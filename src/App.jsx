@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import Markdown from 'react-markdown';
 
-// 1. DICTIONARY - Standardized UI labels
 const uiTranslations = {
   English: {
     language: "Language",
@@ -64,7 +63,6 @@ export default function App() {
     setLoading(true);
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
-      // Using Gemini 2.5 Pro for superior reasoning and translation
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
       const prompt = `
@@ -118,7 +116,6 @@ export default function App() {
     <div className="min-h-screen bg-[#A2B9CF] flex items-center justify-center p-4 font-mono text-black">
       <div className="w-full max-w-2xl bg-white border-4 border-black shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] relative overflow-hidden">
         
-        {/* Settings Toggle */}
         <button 
           onClick={() => setShowSettings(!showSettings)}
           className="absolute top-4 right-4 bg-white border-2 border-black px-3 py-1 font-black text-[10px] hover:bg-yellow-400 z-30 transition-colors uppercase"
@@ -138,14 +135,12 @@ export default function App() {
           </div>
         )}
 
-        {/* Header */}
         <header className="bg-yellow-400 border-b-4 border-black p-10 text-center">
           <h1 className="text-6xl font-black italic tracking-tighter uppercase leading-none">
             DishDash
           </h1>
         </header>
 
-        {/* Controls */}
         <div className="p-6 md:p-10 flex flex-col items-center">
           
           <div className="mb-8 text-center">
@@ -179,7 +174,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Recipe Section */}
           {recipe && (
             <div className="mt-12 border-t-4 border-black pt-10 w-full">
               <div className="prose prose-slate max-w-none 
