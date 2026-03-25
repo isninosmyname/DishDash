@@ -8,7 +8,7 @@ const uiTranslations = {
     history: "Recent", selectFav: "Select a Favorite...",
     addFav: "♥ Save to Favorites", remFav: "Remove Favorite", 
     secret: "Chef's Secret", copy: "Copy Recipe", copied: "Copied!",
-    clear: "Clear History"
+    clear: "Clear History", health: "Health Check", analyzing: "Analyzing..."
   },
   Español: {
     language: "Idioma", button: "Cocinar", loading: "Batiendo...",
@@ -16,7 +16,7 @@ const uiTranslations = {
     history: "Recientes", selectFav: "Seleccionar Favorito...",
     addFav: "♥ Guardar Favorito", remFav: "Eliminar Favorito", 
     secret: "Secreto del Chef", copy: "Copiar Receta", copied: "¡Copiado!",
-    clear: "Borrar Todo"
+    clear: "Borrar Todo", health: "Análisis Salud", analyzing: "Analizando..."
   }
 };
 
@@ -33,6 +33,9 @@ export default function App() {
   const [history, setHistory] = useState(JSON.parse(localStorage.getItem('dishdash_history')) || []);
   const [favorites, setFavorites] = useState(JSON.parse(localStorage.getItem('dishdash_favs')) || []);
   
+  const [healthData, setHealthData] = useState(null);
+  const [analyzingHealth, setAnalyzingHealth] = useState(false);
+  
   const ui = uiTranslations[language] || uiTranslations.English;
 
   useEffect(() => {
@@ -42,20 +45,6 @@ export default function App() {
     localStorage.setItem('dishdash_history', JSON.stringify(history));
     localStorage.setItem('dishdash_favs', JSON.stringify(favorites));
   }, [apiKey, provider, modelId, history, favorites]);
-
-  const deleteRecipe = (index, e) => {
-    e.stopPropagation();
-    const newHistory = history.filter((_, i) => i !== index);
-    setHistory(newHistory);
-    if (recipe === history[index]) setRecipe("");
-  };
-
-  const handleCopy = () => {
-    if (!recipe) return;
-    navigator.clipboard.writeText(recipe);
-    setCopyStatus(true);
-    setTimeout(() => setCopyStatus(false), 2000);
-  };
 
   const callAI = async (payload, isVision = false) => {
     if (provider === "google") {
@@ -74,20 +63,26 @@ export default function App() {
       return data.candidates[0].content.parts[0].text;
     }
 
-    const url = provider === "openai" 
-      ? "https://api.openai.com/v1/chat/completions" 
-      : "https://openrouter.ai/api/v1/chat/completions";
-
+    const url = provider === "openai" ? "https://api.openai.com/v1/chat/completions" : "https://openrouter.ai/api/v1/chat/completions";
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: modelId,
-        messages: [{ role: "user", content: payload }]
-      })
+      body: JSON.stringify({ model: modelId, messages: [{ role: "user", content: payload }] })
     });
     const data = await res.json();
     return data.choices[0].message.content;
+  };
+
+  const handleHealthCheck = async () => {
+    if (!recipe || !apiKey) return;
+    setAnalyzingHealth(true);
+    try {
+      const prompt = `Analyze this recipe: ${recipe}. Return ONLY a score 1-100 and 3 short bullets in ${language}. Format: SCORE: [num] \n [bullets]`;
+      const result = await callAI(prompt);
+      const scoreMatch = result.match(/SCORE:\s*(\d+)/i);
+      setHealthData({ score: scoreMatch ? parseInt(scoreMatch[1]) : 50, bullets: result.replace(/SCORE:\s*\d+/i, '').trim() });
+    } catch (err) { alert("Health analysis failed"); } 
+    finally { setAnalyzingHealth(false); }
   };
 
   const handleImageUpload = async (e) => {
@@ -114,8 +109,9 @@ export default function App() {
     const finalIngredients = inputStr || ingredients;
     if (!finalIngredients) return;
     setLoading(true);
+    setHealthData(null);
     try {
-      const prompt = `Chef. Ingredients: ${finalIngredients}. Language: ${language}. Format: # [Title] ## Steps: 1..5 > **${ui.secret}:** [Tip]`;
+      const prompt = `Chef role. Ingredients: ${finalIngredients}. Language: ${language}. Format: # [Title] ## Steps: 1..5 > **${ui.secret}:** [Tip]`;
       const text = await callAI(prompt);
       setRecipe(text);
       setHistory(prev => [text, ...prev].slice(0, 10));
@@ -129,29 +125,27 @@ export default function App() {
     <div className="dark min-h-screen bg-[#0f172a] flex items-center justify-center p-4 font-mono text-white">
       <div className="w-full max-w-6xl bg-[#1a1a1a] border-4 border-white shadow-[10px_10px_0px_0px_white] flex flex-col md:flex-row overflow-hidden">
         
-        {/* Sidebar */}
+        {/* Sidebar with Delete Functionality */}
         <div className="w-full md:w-64 border-b-4 md:border-b-0 md:border-r-4 border-white p-6 bg-[#111] flex flex-col">
           <h2 className="font-black uppercase text-xs mb-4 bg-white text-black p-2 text-center tracking-widest">{ui.history}</h2>
           <div className="space-y-2 flex-1 overflow-y-auto max-h-96 pr-2">
             {history.map((item, i) => (
               <div key={i} className="group relative">
-                <button onClick={() => setRecipe(item)} className="w-full text-left text-[10px] font-black border-2 border-white/20 p-3 pr-8 hover:bg-yellow-500 hover:text-black truncate bg-black uppercase transition-colors">
+                <button onClick={() => {setRecipe(item); setHealthData(null);}} className="w-full text-left text-[10px] font-black border-2 border-white/20 p-3 pr-8 hover:bg-yellow-500 hover:text-black truncate bg-black uppercase">
                   {getTitle(item)}
                 </button>
-                <button onClick={(e) => deleteRecipe(i, e)} className="absolute right-2 top-1/2 -translate-y-1/2 text-white group-hover:text-black font-bold px-1 text-xs">
-                  ✕
-                </button>
+                <button onClick={(e) => { e.stopPropagation(); setHistory(history.filter((_, idx) => idx !== i)); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-white group-hover:text-black font-bold px-1 text-xs">✕</button>
               </div>
             ))}
           </div>
           {history.length > 0 && (
-            <button onClick={() => setHistory([])} className="mt-4 border-2 border-red-600 text-red-600 p-2 text-[10px] font-black uppercase hover:bg-red-600 hover:text-white transition-all">
+            <button onClick={() => setHistory([])} className="mt-4 border-2 border-red-600 text-red-600 p-2 text-[10px] font-black uppercase hover:bg-red-600 hover:text-white">
               {ui.clear}
             </button>
           )}
         </div>
 
-        {/* Main Content */}
+        {/* Main Content Area */}
         <div className="flex-1 relative">
           <button onClick={() => setShowSettings(!showSettings)} className="absolute top-4 right-4 bg-black border-2 border-white px-3 py-1 font-black text-[10px] hover:bg-yellow-500 hover:text-black uppercase z-50">
             {showSettings ? "CLOSE" : ui.settings}
@@ -199,13 +193,30 @@ export default function App() {
               <div className="mt-12 border-t-4 border-white pt-8">
                 <div className="flex gap-4 mb-6">
                   <button onClick={() => setFavorites(prev => prev.includes(recipe) ? prev.filter(f => f !== recipe) : [recipe, ...prev])}
-                    className={`border-4 border-white px-6 py-2 font-black uppercase text-xs ${favorites.includes(recipe) ? 'bg-red-600' : 'bg-white text-black'}`}>
+                    className={`border-4 border-white px-6 py-2 font-black uppercase text-xs ${favorites.includes(recipe) ? 'bg-red-600 text-white' : 'bg-white text-black hover:bg-yellow-500'}`}>
                     {favorites.includes(recipe) ? ui.remFav : ui.addFav}
                   </button>
-                  <button onClick={handleCopy} className="bg-blue-600 border-4 border-white px-6 py-2 font-black uppercase text-xs hover:bg-white hover:text-black">
+                  <button onClick={() => { navigator.clipboard.writeText(recipe); setCopyStatus(true); setTimeout(()=>setCopyStatus(false), 2000); }} 
+                    className="bg-blue-600 border-4 border-white px-6 py-2 font-black uppercase text-xs hover:bg-white hover:text-black">
                     {copyStatus ? ui.copied : ui.copy}
                   </button>
+                  <button onClick={handleHealthCheck} disabled={analyzingHealth} className="bg-green-600 border-4 border-white px-6 py-2 font-black uppercase text-xs hover:bg-white hover:text-black">
+                    {analyzingHealth ? ui.analyzing : ui.health}
+                  </button>
                 </div>
+
+                {healthData && (
+                  <div className="mb-6 border-4 border-white p-4 bg-black/60 animate-in fade-in slide-in-from-top-4">
+                    <div className="flex items-center gap-4 mb-2">
+                      <span className="font-black text-2xl uppercase">Health Score: {healthData.score}/100</span>
+                      <div className="flex-1 h-4 border-2 border-white bg-black">
+                        <div className="h-full transition-all duration-1000" style={{ width: `${healthData.score}%`, backgroundColor: healthData.score > 70 ? '#22c55e' : healthData.score > 40 ? '#eab308' : '#ef4444' }} />
+                      </div>
+                    </div>
+                    <div className="text-[11px] leading-relaxed italic opacity-90"><Markdown>{healthData.bullets}</Markdown></div>
+                  </div>
+                )}
+
                 <div className="prose prose-invert max-w-none prose-p:text-yellow-500 prose-headings:font-black border-4 border-white/10 p-6 bg-black/40">
                   <Markdown>{recipe}</Markdown>
                 </div>
