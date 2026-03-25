@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Markdown from 'react-markdown'
 
 const uiTranslations = {
@@ -14,7 +14,8 @@ const uiTranslations = {
       detailed: "Detailed",
       healthy: "Healthy",
       budget: "Budget"
-    }
+    },
+    listen: "Listen"
   },
   Español: {
     language: "Idioma", button: "Cocinar", loading: "Batiendo...",
@@ -28,7 +29,8 @@ const uiTranslations = {
       detailed: "Detallado",
       healthy: "Saludable",
       budget: "Económico"
-    }
+    },
+    listen: "Escuchar"
   }
 }
 
@@ -47,6 +49,8 @@ export default function App() {
   const [healthData, setHealthData] = useState(null)
   const [analyzingHealth, setAnalyzingHealth] = useState(false)
   const [mode, setMode] = useState("Quick")
+  const [listening, setListening] = useState(false)
+  const recognitionRef = useRef(null)
 
   const ui = uiTranslations[language] || uiTranslations.English
 
@@ -73,7 +77,6 @@ export default function App() {
       if (!res.ok) throw new Error(data.error?.message || "Google Error")
       return data.candidates[0].content.parts[0].text
     }
-
     const url = provider === "openai"
       ? "https://api.openai.com/v1/chat/completions"
       : "https://openrouter.ai/api/v1/chat/completions"
@@ -172,10 +175,35 @@ Format strictly:
 
   const getTitle = (t) => t.split('\n')[0].replace(/[#*]/g, '').trim().toUpperCase() || "RECIPE"
 
+  const handleListen = () => {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      alert("Speech recognition not supported in this browser")
+      return
+    }
+    if (!recognitionRef.current) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+      recognitionRef.current = new SpeechRecognition()
+      recognitionRef.current.lang = language === 'English' ? 'en-US' : 'es-ES'
+      recognitionRef.current.interimResults = true
+      recognitionRef.current.continuous = true
+      recognitionRef.current.onresult = (event) => {
+        const transcript = Array.from(event.results).map(r => r[0].transcript).join('')
+        setIngredients(transcript)
+      }
+      recognitionRef.current.onend = () => setListening(false)
+    }
+    if (listening) {
+      recognitionRef.current.stop()
+      setListening(false)
+    } else {
+      recognitionRef.current.start()
+      setListening(true)
+    }
+  }
+
   return (
     <div className="dark min-h-screen bg-[#0f172a] flex items-center justify-center p-4 font-mono text-white">
       <div className="w-full max-w-6xl bg-[#1a1a1a] border-4 border-white shadow-[10px_10px_0px_0px_white] flex flex-col md:flex-row overflow-hidden">
-
         <div className="w-full md:w-64 border-b-4 md:border-b-0 md:border-r-4 border-white p-6 bg-[#111] flex flex-col">
           <h2 className="font-black uppercase text-xs mb-4 bg-white text-black p-2 text-center tracking-widest">{ui.history}</h2>
           <div className="space-y-2 flex-1 overflow-y-auto max-h-96 pr-2">
@@ -189,17 +217,11 @@ Format strictly:
             ))}
           </div>
           {history.length > 0 && (
-            <button onClick={() => setHistory([])} className="mt-4 border-2 border-red-600 text-red-600 p-2 text-[10px] font-black uppercase hover:bg-red-600 hover:text-white">
-              {ui.clear}
-            </button>
+            <button onClick={() => setHistory([])} className="mt-4 border-2 border-red-600 text-red-600 p-2 text-[10px] font-black uppercase hover:bg-red-600 hover:text-white">{ui.clear}</button>
           )}
         </div>
-
         <div className="flex-1 relative">
-          <button onClick={() => setShowSettings(!showSettings)} className="absolute top-4 right-4 bg-black border-2 border-white px-3 py-1 font-black text-[10px] hover:bg-yellow-500 hover:text-black uppercase z-50">
-            {showSettings ? "CLOSE" : ui.settings}
-          </button>
-
+          <button onClick={() => setShowSettings(!showSettings)} className="absolute top-4 right-4 bg-black border-2 border-white px-3 py-1 font-black text-[10px] hover:bg-yellow-500 hover:text-black uppercase z-50">{showSettings ? "CLOSE" : ui.settings}</button>
           {showSettings && (
             <div className="absolute top-14 right-4 w-64 bg-[#222] border-4 border-white p-4 z-40 shadow-[4px_4px_0px_0px_white] space-y-3">
               <select className="w-full border-2 border-white p-2 bg-black text-xs" value={provider} onChange={(e) => setProvider(e.target.value)}>
@@ -211,64 +233,44 @@ Format strictly:
               <input type="text" placeholder="Model ID" className="w-full border-2 border-white p-2 text-xs bg-black" value={modelId} onChange={(e) => setModelId(e.target.value)} />
             </div>
           )}
-
           <header className="bg-yellow-500 border-b-4 border-white p-10 text-center">
             <h1 className="text-6xl font-black italic uppercase text-white tracking-tighter drop-shadow-[4px_4px_0px_black]">DishDash</h1>
           </header>
-
           <div className="p-8">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
               <div className="md:col-span-2 flex gap-2">
                 <input className="flex-1 border-4 border-white p-4 font-black bg-transparent outline-none focus:bg-[#222]" placeholder={ui.placeholder} value={ingredients} onChange={(e) => setIngredients(e.target.value)} />
                 <label className="border-4 border-white p-4 bg-white text-black cursor-pointer hover:bg-yellow-500 flex items-center justify-center">
+                  <span className="text-xl">📷</span>
                   <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
                 </label>
+                <button onClick={handleListen} className="border-4 border-white p-4 bg-blue-600 text-white font-black uppercase hover:bg-white hover:text-black">{ui.listen}</button>
               </div>
-
               <select onChange={(e) => e.target.value && setRecipe(e.target.value)} className="md:col-span-1 border-4 border-white p-4 font-black bg-black text-xs h-full">
                 <option value="">{ui.selectFav}</option>
                 {favorites.map((fav, i) => <option key={i} value={fav}>{getTitle(fav)}</option>)}
               </select>
-
               <select className="md:col-span-1 border-4 border-white p-4 font-black bg-black text-xs h-full" value={language} onChange={(e) => setLanguage(e.target.value)}>
                 <option value="English">English</option>
                 <option value="Español">Español</option>
               </select>
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <select
-                className="md:col-span-1 border-4 border-white p-4 font-black bg-black text-xs h-full"
-                value={mode}
-                onChange={(e) => setMode(e.target.value)}
-              >
+              <select className="md:col-span-1 border-4 border-white p-4 font-black bg-black text-xs h-full" value={mode} onChange={(e) => setMode(e.target.value)}>
                 <option value="Quick">{ui.modes.quick}</option>
                 <option value="Detailed">{ui.modes.detailed}</option>
                 <option value="Healthy">{ui.modes.healthy}</option>
                 <option value="Budget">{ui.modes.budget}</option>
               </select>
             </div>
-
-            <button onClick={() => generateRecipe()} disabled={loading} className="w-full bg-white text-black p-5 font-black uppercase text-3xl hover:bg-yellow-500 transition-all active:translate-y-1 shadow-[8px_8px_0px_0px_rgba(255,255,255,0.2)]">
-              {loading ? ui.loading : ui.button}
-            </button>
-
+            <button onClick={() => generateRecipe()} disabled={loading} className="w-full bg-white text-black p-5 font-black uppercase text-3xl hover:bg-yellow-500 transition-all active:translate-y-1 shadow-[8px_8px_0px_0px_rgba(255,255,255,0.2)]">{loading ? ui.loading : ui.button}</button>
             {recipe && (
               <div className="mt-12 border-t-4 border-white pt-8">
                 <div className="flex gap-4 mb-6">
-                  <button onClick={() => setFavorites(prev => prev.includes(recipe) ? prev.filter(f => f !== recipe) : [recipe, ...prev])}
-                    className={`border-4 border-white px-6 py-2 font-black uppercase text-xs ${favorites.includes(recipe) ? 'bg-red-600 text-white' : 'bg-white text-black hover:bg-yellow-500'}`}>
-                    {favorites.includes(recipe) ? ui.remFav : ui.addFav}
-                  </button>
-                  <button onClick={() => { navigator.clipboard.writeText(recipe); setCopyStatus(true); setTimeout(() => setCopyStatus(false), 2000); }}
-                    className="bg-blue-600 border-4 border-white px-6 py-2 font-black uppercase text-xs hover:bg-white hover:text-black">
-                    {copyStatus ? ui.copied : ui.copy}
-                  </button>
-                  <button onClick={handleHealthCheck} disabled={analyzingHealth} className="bg-green-600 border-4 border-white px-6 py-2 font-black uppercase text-xs hover:bg-white hover:text-black">
-                    {analyzingHealth ? ui.analyzing : ui.health}
-                  </button>
+                  <button onClick={() => setFavorites(prev => prev.includes(recipe) ? prev.filter(f => f !== recipe) : [recipe, ...prev])} className={`border-4 border-white px-6 py-2 font-black uppercase text-xs ${favorites.includes(recipe) ? 'bg-red-600 text-white' : 'bg-white text-black hover:bg-yellow-500'}`}>{favorites.includes(recipe) ? ui.remFav : ui.addFav}</button>
+                  <button onClick={() => { navigator.clipboard.writeText(recipe); setCopyStatus(true); setTimeout(() => setCopyStatus(false), 2000); }} className="bg-blue-600 border-4 border-white px-6 py-2 font-black uppercase text-xs hover:bg-white hover:text-black">{copyStatus ? ui.copied : ui.copy}</button>
+                  <button onClick={handleHealthCheck} disabled={analyzingHealth} className="bg-green-600 border-4 border-white px-6 py-2 font-black uppercase text-xs hover:bg-white hover:text-black">{analyzingHealth ? ui.analyzing : ui.health}</button>
                 </div>
-
                 {healthData && (
                   <div className="mb-6 border-4 border-white p-4 bg-black/60 animate-in fade-in slide-in-from-top-4">
                     <div className="flex items-center gap-4 mb-2">
@@ -280,10 +282,7 @@ Format strictly:
                     <div className="text-[11px] leading-relaxed italic opacity-90"><Markdown>{healthData.bullets}</Markdown></div>
                   </div>
                 )}
-
-                <div className="prose prose-invert max-w-none prose-p:text-yellow-500 prose-headings:font-black border-4 border-white/10 p-6 bg-black/40">
-                  <Markdown>{recipe}</Markdown>
-                </div>
+                <div className="prose prose-invert max-w-none prose-p:text-yellow-500 prose-headings:font-black border-4 border-white/10 p-6 bg-black/40"><Markdown>{recipe}</Markdown></div>
               </div>
             )}
           </div>
