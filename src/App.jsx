@@ -44,8 +44,19 @@ export default function App() {
   const [theme, setTheme] = useState(localStorage.getItem('dishdash_theme') || "dark")
   const [listening, setListening] = useState(false)
   const [utterance, setUtterance] = useState(null)
+  const [tags, setTags] = useState(JSON.parse(localStorage.getItem('dishdash_tags')) || [])
 
   const ui = uiTranslations[language] || uiTranslations.English
+
+  const mealTags = ["Breakfast","Lunch","Dinner"]
+  const dailySeed = new Date().toISOString().slice(0,10)
+  const randomIngredientsList = [
+    "Eggs, Spinach, Cheese",
+    "Chicken, Garlic, Lemon",
+    "Tomato, Basil, Pasta",
+    "Oats, Banana, Almond Milk",
+    "Rice, Beans, Avocado"
+  ]
 
   useEffect(() => {
     localStorage.setItem('dishdash_key', apiKey)
@@ -54,7 +65,8 @@ export default function App() {
     localStorage.setItem('dishdash_history', JSON.stringify(history))
     localStorage.setItem('dishdash_favs', JSON.stringify(favorites))
     localStorage.setItem('dishdash_theme', theme)
-  }, [apiKey, provider, modelId, history, favorites, theme])
+    localStorage.setItem('dishdash_tags', JSON.stringify(tags))
+  }, [apiKey, provider, modelId, history, favorites, theme, tags])
 
   const callAI = async (payload, isVision = false) => {
     if (provider === "google") {
@@ -119,6 +131,16 @@ Format strictly:
     } finally {
       setLoading(false)
     }
+  }
+
+  const generateRandomRecipe = () => {
+    const random = randomIngredientsList[Math.floor(Math.random()*randomIngredientsList.length)]
+    generateRecipe(random)
+  }
+
+  const generateDailyRecipe = () => {
+    const index = dailySeed.split('-').reduce((acc,d)=>acc+parseInt(d),0) % randomIngredientsList.length
+    generateRecipe(randomIngredientsList[index])
   }
 
   const handleHealthCheck = async () => {
@@ -256,38 +278,41 @@ Format strictly:
               </select>
             </div>
 
-            <button onClick={()=>generateRecipe()} disabled={loading} className={`w-full ${theme==='dark'?'bg-white text-black':'bg-black text-white'} p-5 font-black uppercase text-3xl hover:bg-yellow-500 transition-all active:translate-y-1 shadow-[8px_8px_0px_0px_rgba(255,255,255,0.2)]`}>
-              {loading? ui.loading: ui.button}
-            </button>
+            <div className="flex gap-2 mb-6">
+              <button onClick={()=>generateRecipe()} disabled={loading} className={`flex-1 border-4 p-5 font-black uppercase text-3xl ${theme==='dark'?'bg-white text-black':'bg-black text-white'} hover:bg-yellow-500`}>{loading? ui.loading: ui.button}</button>
+              <button onClick={generateRandomRecipe} className="border-4 p-5 font-black uppercase text-3xl bg-gray-700 text-white hover:bg-yellow-500">🎲</button>
+              <button onClick={generateDailyRecipe} className="border-4 p-5 font-black uppercase text-3xl bg-orange-600 text-white hover:bg-yellow-500">🌞</button>
+            </div>
+
+            <div className="flex gap-2 mb-6">
+              {mealTags.map((tag)=>
+                <button key={tag} onClick={()=>setTags(prev => prev.includes(tag)?prev.filter(t=>t!==tag):[...prev,tag])}
+                  className={`border-2 p-2 font-black uppercase text-xs ${tags.includes(tag)?"bg-yellow-500 text-black border-white":"bg-transparent text-white border-white hover:bg-yellow-500 hover:text-black"}`}>{tag}</button>
+              )}
+            </div>
 
             {recipe && (
               <div className="mt-12 border-t-4 border-white pt-8">
                 <div className="flex gap-4 mb-6">
                   <button onClick={()=>setFavorites(prev=>prev.includes(recipe)?prev.filter(f=>f!==recipe):[recipe,...prev])} className={`border-4 border-white px-6 py-2 font-black uppercase text-xs ${favorites.includes(recipe)?'bg-red-600 text-white':theme==='dark'?'bg-white text-black hover:bg-yellow-500':'bg-black text-white hover:bg-yellow-500'}`}>{favorites.includes(recipe)?ui.remFav:ui.addFav}</button>
-                  <button onClick={()=>{navigator.clipboard.writeText(recipe); setCopyStatus(true); setTimeout(()=>setCopyStatus(false),2000)}} className={`border-4 px-6 py-2 font-black uppercase text-xs ${theme==='dark'?'bg-blue-600 text-white hover:bg-white hover:text-black':'bg-blue-500 text-white hover:bg-black hover:text-white'}`}>{copyStatus?ui.copied:ui.copy}</button>
-                  <button onClick={handleHealthCheck} disabled={analyzingHealth} className={`border-4 px-6 py-2 font-black uppercase text-xs ${theme==='dark'?'bg-green-600 text-white hover:bg-white hover:text-black':'bg-green-500 text-white hover:bg-black hover:text-white'}`}>{analyzingHealth?ui.analyzing:ui.health}</button>
-                  <button onClick={toggleListen} className={`border-4 px-6 py-2 font-black uppercase text-xs ${theme==='dark'?'bg-purple-600 text-white hover:bg-white hover:text-black':'bg-purple-500 text-white hover:bg-black hover:text-white'}`}>{listening?ui.stop:ui.listen}</button>
+                  <button onClick={()=>{navigator.clipboard.writeText(recipe); setCopyStatus(true); setTimeout(()=>setCopyStatus(false),2000)}} className={`border-4 border-white px-6 py-2 font-black uppercase text-xs ${theme==='dark'?'bg-white text-black hover:bg-yellow-500':'bg-black text-white hover:bg-yellow-500'}`}>{copyStatus?ui.copied:ui.copy}</button>
+                  <button onClick={toggleListen} className={`border-4 border-white px-6 py-2 font-black uppercase text-xs ${theme==='dark'?'bg-white text-black hover:bg-yellow-500':'bg-black text-white hover:bg-yellow-500'}`}>{listening?ui.stop:ui.listen}</button>
+                  <button onClick={handleHealthCheck} className={`border-4 border-white px-6 py-2 font-black uppercase text-xs ${theme==='dark'?'bg-white text-black hover:bg-yellow-500':'bg-black text-white hover:bg-yellow-500'}`}>{ui.health}</button>
                 </div>
 
+                {analyzingHealth && <p>{ui.analyzing}</p>}
                 {healthData && (
-                  <div className={`mb-6 border-4 p-4 ${theme==='dark'?'border-white bg-black/60':'border-black bg-gray-100'}`}>
-                    <div className="flex items-center gap-4 mb-2">
-                      <span className="font-black text-2xl uppercase">Health Score: {healthData.score}/100</span>
-                      <div className="flex-1 h-4 border-2 border-white bg-black">
-                        <div className="h-full transition-all duration-1000" style={{width:`${healthData.score}%`, backgroundColor:healthData.score>70?'#22c55e':healthData.score>40?'#eab308':'#ef4444'}} />
-                      </div>
-                    </div>
-                    <div className="text-[11px] leading-relaxed italic opacity-90"><Markdown>{healthData.bullets}</Markdown></div>
+                  <div className="mb-4">
+                    <p>SCORE: {healthData.score}</p>
+                    <div>{healthData.bullets.split('\n').map((b,i)=><p key={i}>• {b}</p>)}</div>
                   </div>
                 )}
 
-                <div className="prose max-w-none text-xs md:text-sm"><Markdown>{recipe}</Markdown></div>
+                <Markdown className="prose max-w-none">{recipe}</Markdown>
               </div>
             )}
-
           </div>
         </div>
-
       </div>
     </div>
   )
