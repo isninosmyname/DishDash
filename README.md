@@ -1,13 +1,13 @@
 # DishDash
 
-**DishDash** is a minimalist, AI-powered recipe generator designed to help you cook with what you have. Using Google's Gemini AI, it transforms your pantry ingredients into creative, chef-quality recipes in seconds.
+**DishDash** is a minimalist, AI-powered recipe generator designed to help you cook with what you have.
 
 ---
 
 ## Features
 
 - ** AI-Powered Recipes**: Generates creative meals based on the ingredients you provide.
-- ** Multi-Language Support**: Currently supports English, Español, and Français.
+- ** Multi-Language Support**: Currently supports English and Español.
 - ** Neo-Brutalist Design**: A bold, high-contrast, minimalist interface.
 - ** Save & Share**: Easily copy recipes to your clipboard or share them directly.
 
@@ -46,10 +46,11 @@
 ## Usage
 
 1. Click the **Settings** button in the top right.
-2. Enter your **Gemini API Key**.
-3. Select your preferred **Language**.
-4. Type your ingredients (e.g., "Pasta, Garlic, 1 Lime") in the pantry input.
-5. Hit **Roll It** (or Play) and let the magic happen!
+2. Choose your provider.
+3. Enter your **API Key**.
+4. Select your preferred **Language**.
+5. Type your ingredients (e.g., "Pasta, Garlic, 1 Lime") in the pantry input.
+6. Hit **Roll It** (or Play) and let the magic happen!
 
 ---
 
@@ -57,11 +58,16 @@
 
 - **React** (Frontend Framework)
 - **Vite** (Build Tool)
-- **Google Generative AI (Gemini)** (AI Engine)
 - **Tailwind CSS** (Styling)
 - **React Markdown** (Recipe Rendering)
 
 ---
+# Screenshots
+<img width="1103" height="695" alt="image" src="https://github.com/user-attachments/assets/ab7212a9-465c-48f0-965c-cf497ff182f3" />
+
+
+---
+
 # Pushes to GitHub
 
 Feel free to push to GitHub!
