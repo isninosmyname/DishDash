@@ -18,7 +18,8 @@
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) (v18 or higher recommended)
-- A **Google Gemini API Key** ([Get one here](https://aistudio.google.com/app/apikey))
+- A **Google Gemini API Key** ([Get one here](https://aistudio.google.com/app/apikey)) Or Openrouter ([Get one here](https://openrouter.ai/))
+- Or OpenAI ([Get one here](https://platform.openai.com/settings/organization/api-keys))
 
 ### Installation
 
