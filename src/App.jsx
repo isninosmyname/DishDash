@@ -84,7 +84,64 @@ export default function App() {
     setLoading(true)
     setHealthData(null)
     try {
-      const prompt = `You are a professional chef. Ingredients: ${finalIngredients} Language: ${language} Mode: ${mode} Rules based on mode: - Quick: max 3 simple steps - Detailed: clear, step-by-step with tips - Healthy: lower fat, balanced ingredients - Budget: cheap, simple ingredients Also include: Time (minutes) Difficulty (Easy/Medium/Hard) Format strictly: # Recipe Title Time: X mins Difficulty: X ## Steps 1. 2. 3. > **${ui.secret}:** helpful tip`
+      const prompt = `ROLE AND PURPOSE
+You are a Michelin-star Executive Chef and Culinary Consultant. Your goal is to transform a specific list of ingredients into a high-quality recipe, strictly adhering to the requested dietary mode and output language.
+
+INPUT VARIABLES
+Ingredients: ${finalIngredients}
+
+Output Language: ${language}
+
+Cooking Mode: ${mode}
+
+Context/Secret: ${ui.secret}
+
+OPERATIONAL RULES (CRITICAL)
+STRICT MODE ADHERENCE:
+
+Quick: Maximum of 3 simple steps. Focus on speed and high heat.
+
+Detailed: Granular step-by-step instructions including professional techniques (e.g., deglazing, emulsifying).
+
+Healthy: Focus on steaming, grilling, or raw preparations. Minimize saturated fats and refined sugars.
+
+Budget: Prioritize yield and the use of every part of the provided ingredients.
+
+NO HALLUCINATIONS: Use only the ingredients provided in ${finalIngredients}. You may assume basic pantry staples (salt, pepper, water, oil) unless the mode is "Budget."
+
+COMMUNICATION EFFICIENCY: Do not include greetings or conversational fillers. Start immediately with the recipe.
+
+LANGUAGE: The entire output must be written in ${language}.
+
+REASONING FRAMEWORK (MANDATORY)
+Before generating the recipe, you must process the culinary logic inside a <thinking> block:
+
+<thinking>
+
+Analyze ${finalIngredients} and identify the lead protein/vegetable.
+
+Evaluate how to apply ${mode} to these specific ingredients.
+
+Determine the estimated cooking time and difficulty level.
+
+Synthesize the ${ui.secret} into a coherent professional tip.
+</thinking>
+
+REQUIRED OUTPUT FORMAT
+The response must follow this Markdown structure strictly:
+
+[Recipe Title based on Mode and Ingredients]
+Time: [X] mins
+Difficulty: [Easy/Medium/Hard]
+
+Steps
+[Step 1]
+
+[Step 2]
+
+[Step 3/etc.]
+
+Chef's Secret: ${ui.secret}`
       const text = await callAI(prompt)
       setRecipe(text)
       setHistory(prev => [text, ...prev].slice(0, 10))
@@ -219,9 +276,9 @@ export default function App() {
   }
 
   return (
-    <div className={`${theme === 'dark' ? 'bg-[#0f172a] text-white' : 'bg-white text-black'} min-h-screen flex items-center justify-center p-4 font-mono`}>
+    <div className={`${theme === 'dark' ? 'bg-[#0f172a] text-white' : 'bg-white text-black'} min-h-screen flex flex-col md:flex-row items-center justify-start p-2 md:p-4 font-mono`}>
       <div className={`w-full max-w-6xl ${theme === 'dark' ? 'bg-[#1a1a1a]' : 'bg-gray-100'} border-4 border-white shadow-[10px_10px_0px_0px_white] flex flex-col md:flex-row overflow-hidden`}>
-        <div className={`${theme === 'dark' ? 'bg-[#111]' : 'bg-gray-200'} w-full md:w-64 border-b-4 md:border-b-0 md:border-r-4 border-white p-6 flex flex-col`}>
+        <div className={`${theme === 'dark' ? 'bg-[#111]' : 'bg-gray-200'} w-full md:w-64 border-b-4 md:border-b-0 md:border-r-4 border-white p-4 md:p-6 flex flex-col max-h-96 md:max-h-full overflow-y-auto`}>
           <h2 className={`${theme === 'dark' ? 'bg-white text-black' : 'bg-black text-white'} font-black uppercase text-xs mb-4 p-2 text-center tracking-widest`}>{ui.history}</h2>
           <div className="space-y-2 flex-1 overflow-y-auto max-h-96 pr-2">
             {history.map((item, i) => (
@@ -348,11 +405,7 @@ export default function App() {
               </select>
             </div>
 
-            <button
-              onClick={() => generateRecipe()}
-              disabled={loading}
-              className={`w-full ${theme === 'dark' ? 'bg-white text-black' : 'bg-black text-white'} p-5 font-black uppercase text-3xl hover:bg-yellow-500 transition-all active:translate-y-1 shadow-[8px_8px_0px_0px_rgba(255,255,255,0.2)]`}
-            >
+            <button onClick={() => generateRecipe()} disabled={loading} className={`w-full md:w-auto ${theme === 'dark' ? 'bg-white text-black' : 'bg-black text-white'} p-3 md:p-5 font-black uppercase text-xl md:text-3xl hover:bg-yellow-500 transition-all active:translate-y-1 shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)]`}>
               {loading ? ui.loading : ui.button}
             </button>
 
@@ -407,7 +460,7 @@ export default function App() {
                 </div>
 
                 {healthData && (
-                  <div className={`mb-6 border-4 p-4 ${theme === 'dark' ? 'border-white bg-black/60' : 'border-black bg-gray-100'}`}>
+                  <div className={`mb-4 border-4 p-2 md:p-4 ${theme === 'dark' ? 'border-white bg-black/60' : 'border-black bg-gray-100'}`}>
                     <div className="flex items-center gap-4 mb-2">
                       <span className="font-black text-2xl uppercase">Health Score: {healthData.score}/100</span>
                       <div className="flex-1 h-4 border-2 border-white bg-black">
@@ -423,9 +476,7 @@ export default function App() {
                   </div>
                 )}
 
-                <div className="prose max-w-none text-xs md:text-sm">
-                  <Markdown>{recipe}</Markdown>
-                </div>
+                <div className="prose max-w-full text-[10px] md:text-sm md:prose-sm"><Markdown>{recipe}</Markdown></div>
               </div>
             )}
           </div>
