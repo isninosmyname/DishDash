@@ -6,11 +6,12 @@ export default function FilterSection({
   setLanguage, 
   mode, 
   setMode, 
-  onImageUpload 
+  onImageUpload,
+  ui
 }) {
   const filters = [
     { 
-      label: 'LANGUAGE', 
+      label: ui.language.toUpperCase(), 
       value: language, 
       icon: <Globe size={18} className="text-yellow-500" />, 
       options: [
@@ -20,14 +21,14 @@ export default function FilterSection({
       onChange: (e) => setLanguage(e.target.value)
     },
     { 
-      label: 'COOKING MODE', 
+      label: ui.history.toUpperCase(), 
       value: mode, 
       icon: <Zap size={18} className="text-green-500 fill-green-500" />, 
       options: [
-        { label: 'Quick (20 min)', value: 'Quick' },
-        { label: 'Detailed', value: 'Detailed' },
-        { label: 'Healthy', value: 'Healthy' },
-        { label: 'Budget', value: 'Budget' }
+        { label: ui.modes.quick, value: 'Quick' },
+        { label: ui.modes.detailed, value: 'Detailed' },
+        { label: ui.modes.healthy, value: 'Healthy' },
+        { label: ui.modes.budget, value: 'Budget' }
       ],
       onChange: (e) => setMode(e.target.value)
     }
@@ -37,13 +38,14 @@ export default function FilterSection({
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 px-6 mb-16">
       {filters.map((filter) => (
         <div key={filter.label} className="bg-white/5 border border-white/5 rounded-2xl p-6 relative group transition-all duration-300 hover:bg-white/10">
-          <label className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-3">
+          <label htmlFor={`filter-${filter.label}`} className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-3">
             {filter.label}
           </label>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {filter.icon}
               <select 
+                id={`filter-${filter.label}`}
                 value={filter.value} 
                 onChange={filter.onChange}
                 className="bg-transparent text-white text-sm font-bold appearance-none focus:outline-none cursor-pointer pr-8"
@@ -63,7 +65,7 @@ export default function FilterSection({
         <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-white/40 group-hover:text-yellow-500 transition-colors">
           <Camera size={24} />
         </div>
-        <span className="text-[10px] text-white/40 font-black uppercase tracking-widest group-hover:text-white transition-colors">IMAGE UPLOAD</span>
+        <span className="text-[10px] text-white/40 font-black uppercase tracking-widest group-hover:text-white transition-colors">{ui.filterImage}</span>
       </label>
     </div>
   );

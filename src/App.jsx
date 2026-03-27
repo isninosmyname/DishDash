@@ -16,8 +16,82 @@ const ingredientPools = {
 const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 const uiTranslations = {
-  English: { language: "Language", button: "Roll It", loading: "Whisking...", settings: "Settings", placeholder: "Pasta, Garlic, 1 Lime...", history: "Recent", selectFav: "Select a Favorite...", addFav: "Save to Favorites", remFav: "Remove Favorite", secret: "Chef's Secret", copy: "Copy Recipe", copied: "Copied!", clear: "Clear History", health: "Health Check", analyzing: "Analyzing...", modes: { quick: "Quick", detailed: "Detailed", healthy: "Healthy", budget: "Budget" }, theme: "Theme", light: "Light", dark: "Dark", listen: "Listen", stop: "Stop", daily: 'Daily recipe' },
-  Español: { language: "Idioma", button: "Cocinar", loading: "Batiendo...", settings: "Ajustes", placeholder: "Pasta, Ajo, 1 Limón...", history: "Recientes", selectFav: "Seleccionar Favorito...", addFav: "Guardar Favorito", remFav: "Eliminar Favorito", secret: "Secreto del Chef", copy: "Copiar Receta", copied: "¡Copiado!", clear: "Borrar Todo", health: "Análisis Salud", analyzing: "Analizando...", modes: { quick: "Rápido", detailed: "Detallado", healthy: "Saludable", budget: "Económico" }, theme: "Tema", light: "Claro", dark: "Oscuro", listen: "Escuchar", stop: "Parar", daily: 'Receta diaria' }
+  English: { 
+    language: "Language", 
+    button: "Roll It", 
+    loading: "Whisking...", 
+    settings: "Settings", 
+    placeholder: "Pasta, Garlic, 1 Lime...", 
+    history: "Recent", 
+    selectFav: "Select a Favorite...", 
+    addFav: "Save to Favorites", 
+    remFav: "Remove Favorite", 
+    secret: "Chef's Secret", 
+    copy: "Copy Recipe", 
+    copied: "Copied!", 
+    clear: "Clear History", 
+    health: "Health Check", 
+    analyzing: "Analyzing...", 
+    modes: { quick: "Quick", detailed: "Detailed", healthy: "Healthy", budget: "Budget" }, 
+    theme: "Theme", 
+    light: "Light", 
+    dark: "Dark", 
+    listen: "Listen", 
+    stop: "Stop", 
+    daily: 'Daily recipe',
+    heroTitle: "What's in your",
+    heroKitchen: "Kitchen?",
+    featuredRandom: { type: "DISCOVERY", title: "Random Recipe", desc: "Feeling adventurous? Let our algorithm pick a wild card ingredient fusion for you." },
+    featuredDaily: { type: "DAILY FRESH", title: "Daily Recipe", desc: "Chef's curated pick of the day focusing on seasonal greens." },
+    favTitle: "Your Favorites",
+    favSub: "Recipes you've hand-picked for greatness",
+    recentTitle: "Recent Inventions",
+    recentSub: "Your past culinary creations and searches",
+    recipeHeading: "Your Recipe",
+    craftedBy: "Crafted by DishDash AI",
+    healthHeading: "Health Analysis",
+    scoreLabel: "SCORE",
+    sidebar: { home: "Home", favs: "Favorites", recent: "Recent Searches", settings: "Settings", profile: "Chef's Table" },
+    filterImage: "IMAGE UPLOAD"
+  },
+  Español: { 
+    language: "Idioma", 
+    button: "Cocinar", 
+    loading: "Batiendo...", 
+    settings: "Ajustes", 
+    placeholder: "Pasta, Ajo, 1 Limón...", 
+    history: "Recientes", 
+    selectFav: "Seleccionar Favorito...", 
+    addFav: "Guardar Favorito", 
+    remFav: "Eliminar Favorito", 
+    secret: "Secreto del Chef", 
+    copy: "Copiar Receta", 
+    copied: "¡Copiado!", 
+    clear: "Borrar Todo", 
+    health: "Análisis Salud", 
+    analyzing: "Analizando...", 
+    modes: { quick: "Rápido", detailed: "Detallado", healthy: "Saludable", budget: "Económico" }, 
+    theme: "Tema", 
+    light: "Claro", 
+    dark: "Oscuro", 
+    listen: "Escuchar", 
+    stop: "Parar", 
+    daily: 'Receta diaria',
+    heroTitle: "¿Qué hay en tu",
+    heroKitchen: "Cocina?",
+    featuredRandom: { type: "DESCUBRIR", title: "Receta Aleatoria", desc: "¿Te atreves? Deja que nuestro algoritmo elija una fusión de ingredientes salvaje." },
+    featuredDaily: { type: "FRESCO DIARIO", title: "Receta del Día", desc: "La selección del chef enfocada en ingredientes de temporada." },
+    favTitle: "Tus Favoritos",
+    favSub: "Recetas elegidas a mano por ti",
+    recentTitle: "Inventos Recientes",
+    recentSub: "Tus creaciones culinarias y búsquedas pasadas",
+    recipeHeading: "Tu Receta",
+    craftedBy: "Creado por DishDash AI",
+    healthHeading: "Análisis de Salud",
+    scoreLabel: "PUNTOS",
+    sidebar: { home: "Inicio", favs: "Favoritos", recent: "Búsquedas", settings: "Ajustes", profile: "Mesa del Chef" },
+    filterImage: "SUBIR IMAGEN"
+  }
 };
 
 export default function App() {
@@ -201,6 +275,7 @@ export default function App() {
         language={language} 
         setLanguage={setLanguage}
         setShowSettings={setShowSettings}
+        ui={ui}
       />
 
       <main className="flex-1 overflow-y-auto pb-32 md:pb-0" ref={mainContentRef}>
@@ -210,6 +285,7 @@ export default function App() {
             setIngredients={setIngredients} 
             onRoll={() => generateRecipe()} 
             loading={loading}
+            ui={ui}
           />
 
           <FilterSection 
@@ -218,18 +294,20 @@ export default function App() {
             mode={mode}
             setMode={setMode}
             onImageUpload={handleImageUpload}
+            ui={ui}
           />
 
           <FeaturedCards 
             onRandom={surpriseMe}
             onDaily={generateDailyRecipe}
+            ui={ui}
           />
         </div>
 
         <div id="favorites">
           <RecipeList 
-            title="Your Favorites"
-            subtitle="Recipes you've hand-picked for greatness"
+            title={ui.favTitle}
+            subtitle={ui.favSub}
             items={favorites}
             onSelect={setRecipe}
             onDelete={(index) => setFavorites(prev => prev.filter((_, i) => i !== index))}
@@ -239,8 +317,8 @@ export default function App() {
 
         <div id="recent">
           <RecipeList 
-            title="Recent Inventions"
-            subtitle="Your past culinary creations and searches"
+            title={ui.recentTitle}
+            subtitle={ui.recentSub}
             items={history}
             onSelect={setRecipe}
             onDelete={(index) => setHistory(prev => prev.filter((_, i) => i !== index))}
@@ -257,10 +335,10 @@ export default function App() {
                   <img src="/logo.png" alt="Logo" className="w-12 h-12 rounded-xl shadow-[0_0_15px_rgba(255,215,0,0.2)]" />
                   <div>
                     <h2 className="text-2xl md:text-4xl font-black tracking-tighter mb-1 italic text-yellow-500 uppercase">
-                      Your Recipe
+                      {ui.recipeHeading}
                     </h2>
                     <p className="text-white/40 text-[10px] md:text-sm font-medium uppercase tracking-widest">
-                      Crafted by DishDash AI • {mode} Mode
+                      {ui.craftedBy} • {mode} Mode
                     </p>
                   </div>
                 </div>
@@ -315,10 +393,10 @@ export default function App() {
                     <div className="flex items-center gap-4 md:gap-6 mb-4 md:mb-6">
                       <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl bg-green-500/20 flex flex-col items-center justify-center border border-green-500/20 shadow-inner">
                         <span className="text-2xl md:text-3xl font-black text-green-500">{healthData.score}</span>
-                        <span className="text-[7px] md:text-[8px] font-black text-green-500/60 tracking-widest uppercase">SCORE</span>
+                        <span className="text-[7px] md:text-[8px] font-black text-green-500/60 tracking-widest uppercase">{ui.scoreLabel}</span>
                       </div>
                       <div className="flex-1">
-                        <h4 className="text-white font-black text-base md:text-lg mb-1 md:mb-2 uppercase tracking-tight">Health Analysis</h4>
+                        <h4 className="text-white font-black text-base md:text-lg mb-1 md:mb-2 uppercase tracking-tight">{ui.healthHeading}</h4>
                         <div className="w-full h-1.5 md:h-2 bg-white/5 rounded-full overflow-hidden">
                           <div 
                             className="h-full bg-green-500 transition-all duration-1000 shadow-[0_0_10px_rgba(34,197,94,0.5)]" 
@@ -352,8 +430,9 @@ export default function App() {
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2">Provider</label>
+                  <label htmlFor="settings-provider" className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2">Provider</label>
                   <select
+                    id="settings-provider"
                     className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-yellow-500"
                     value={provider}
                     onChange={(e) => setProvider(e.target.value)}
@@ -365,8 +444,9 @@ export default function App() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2">API Key</label>
+                  <label htmlFor="settings-apikey" className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2">API Key</label>
                   <input
+                    id="settings-apikey"
                     type="password"
                     placeholder="Enter API Key"
                     className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-yellow-500"
@@ -376,8 +456,9 @@ export default function App() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2">Model ID</label>
+                  <label htmlFor="settings-model" className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2">Model ID</label>
                   <input
+                    id="settings-model"
                     type="text"
                     placeholder="e.g. gemini-2.0-flash"
                     className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-yellow-500"

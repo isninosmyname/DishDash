@@ -1,26 +1,25 @@
-import React from 'react';
 import { Sparkles, Soup, ArrowRight } from 'lucide-react';
 
-export default function FeaturedCards({ onRandom, onDaily }) {
+export default function FeaturedCards({ onRandom, onDaily, ui }) {
   const cards = [
     {
-      type: 'DISCOVERY',
-      title: 'Random Recipe',
-      description: 'Feeling adventurous? Let our algorithm pick a wild card ingredient fusion for you.',
+      type: ui.featuredRandom.type,
+      title: ui.featuredRandom.title,
+      description: ui.featuredRandom.desc,
       image: '/random-recipe.png',
       bgColor: 'bg-[#5B2A4B]',
-      btnText: 'SURPRISE ME',
+      btnText: ui.button,
       btnColor: 'bg-[#DEB3C4] text-[#5B2A4B]',
       onClick: onRandom,
       icon: <Sparkles size={16} />
     },
     {
-      type: 'DAILY FRESH',
-      title: 'Daily Recipe',
-      description: "Chef's curated pick of the day focusing on seasonal greens.",
+      type: ui.featuredDaily.type,
+      title: ui.featuredDaily.title,
+      description: ui.featuredDaily.desc,
       image: '/daily-recipe.png',
       bgColor: 'bg-[#4B5E4A]',
-      btnText: 'VIEW TODAY',
+      btnText: ui.button,
       btnColor: 'bg-[#2E7D32] text-white',
       onClick: onDaily,
       icon: <Soup size={16} />

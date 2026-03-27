@@ -1,12 +1,12 @@
 import React from 'react';
 import { Home, Heart, Clock, Settings, HelpCircle, Globe, ChevronDown } from 'lucide-react';
 
-export default function Sidebar({ activeTab, onNavigate, language, setLanguage, setShowSettings }) {
+export default function Sidebar({ activeTab, onNavigate, language, setLanguage, setShowSettings, ui }) {
   const menuItems = [
-    { id: 'Home', icon: Home, label: 'Home', section: 'home' },
-    { id: 'Favorites', icon: Heart, label: 'Favorites', section: 'favorites' },
-    { id: 'Recent', icon: Clock, label: 'Recent Searches', section: 'recent' },
-    { id: 'Settings', icon: Settings, label: 'Settings' },
+    { id: 'Home', icon: Home, label: ui.sidebar.home, section: 'home' },
+    { id: 'Favorites', icon: Heart, label: ui.sidebar.favs, section: 'favorites' },
+    { id: 'Recent', icon: Clock, label: ui.sidebar.recent, section: 'recent' },
+    { id: 'Settings', icon: Settings, label: ui.sidebar.settings },
   ];
 
   return (
@@ -25,7 +25,7 @@ export default function Sidebar({ activeTab, onNavigate, language, setLanguage, 
               CT
             </div>
             <div>
-              <h3 className="text-white text-sm font-bold">Chef's Table</h3>
+              <h3 className="text-white text-sm font-bold">{ui.sidebar.profile}</h3>
             </div>
           </div>
 
