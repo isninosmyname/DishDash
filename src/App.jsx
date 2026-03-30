@@ -148,6 +148,8 @@ export default function App() {
   const [isOnboarded, setIsOnboarded] = useState(localStorage.getItem('dishdash_onboarded') === 'true');
   const [user, setUser] = useState(localStorage.getItem('dishdash_user') || "");
   const [toasts, setToasts] = useState([]);
+  const [availableModels, setAvailableModels] = useState([]);
+  const [loadingModels, setLoadingModels] = useState(false);
 
   const showToast = (message, type = 'error') => {
     const id = Date.now();
@@ -162,6 +164,47 @@ export default function App() {
   const initialMount = useRef(true);
 
   const ui = uiTranslations[language] || uiTranslations.English;
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchModels = async () => {
+      setAvailableModels([]);
+      if (!apiKey && provider !== 'openrouter') {
+        return;
+      }
+      setLoadingModels(true);
+      try {
+        if (provider === 'google') {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+          const data = await res.json();
+          if (data.models && isMounted) {
+            setAvailableModels(data.models.map(m => ({ id: m.name.replace('models/', ''), name: m.displayName || m.name })));
+          }
+        } else if (provider === 'openrouter') {
+          const res = await fetch('https://openrouter.ai/api/v1/models');
+          const data = await res.json();
+          if (data.data && isMounted) {
+            setAvailableModels(data.data.map(m => ({ id: m.id, name: m.name })).slice(0, 100)); // limit to 100 for perf
+          }
+        } else if (provider === 'openai') {
+          const res = await fetch('https://api.openai.com/v1/models', {
+            headers: { 'Authorization': `Bearer ${apiKey}` }
+          });
+          const data = await res.json();
+          if (data.data && isMounted) {
+            setAvailableModels(data.data.filter(m => m.id.includes('gpt')).map(m => ({ id: m.id, name: m.id })));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch models", err);
+      } finally {
+        if (isMounted) setLoadingModels(false);
+      }
+    };
+    
+    if (showSettings) fetchModels();
+    return () => { isMounted = false; };
+  }, [provider, apiKey, showSettings]);
 
   useEffect(() => {
     localStorage.setItem('dishdash_key', apiKey);
@@ -460,6 +503,7 @@ export default function App() {
             setMode={setMode}
             onImageUpload={handleImageUpload}
             ui={ui}
+            modelId={modelId}
           />
 
           <FeaturedCards 
@@ -661,7 +705,12 @@ export default function App() {
                     id="settings-provider"
                     className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-yellow-500"
                     value={provider}
-                    onChange={(e) => setProvider(e.target.value)}
+                    onChange={(e) => {
+                      const newProv = e.target.value;
+                      setProvider(newProv);
+                      setModelId(newProv === 'google' ? 'gemini-2.0-flash' : newProv === 'openai' ? 'gpt-4o' : '');
+                      setAvailableModels([]);
+                    }}
                   >
                     <option value="google">Google Gemini</option>
                     <option value="openai">OpenAI</option>
@@ -682,15 +731,23 @@ export default function App() {
                 </div>
 
                 <div>
-                  <label htmlFor="settings-model" className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2">Model ID</label>
-                  <input
+                  <label htmlFor="settings-model" className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2">Model ID {loadingModels && "(Loading...)"}</label>
+                  <select
                     id="settings-model"
-                    type="text"
-                    placeholder="e.g. gemini-2.0-flash"
                     className="w-full h-12 px-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-yellow-500"
                     value={modelId}
                     onChange={(e) => setModelId(e.target.value)}
-                  />
+                  >
+                    {!apiKey && provider !== 'openrouter' ? (
+                      <option value={modelId} className="bg-[#121212]">{modelId} (Enter API Key for more)</option>
+                    ) : availableModels.length > 0 ? (
+                      availableModels.map(m => (
+                        <option key={m.id} value={m.id} className="bg-[#121212]">{m.name}</option>
+                      ))
+                    ) : (
+                      <option value={modelId} className="bg-[#121212]">{modelId}</option>
+                    )}
+                  </select>
                 </div>
               </div>
 

@@ -7,6 +7,49 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
   const [apiKey, setLocalApiKey] = useState("");
   const [provider, setLocalProvider] = useState("google");
   const [modelId, setLocalModelId] = useState("gemini-2.0-flash");
+  const [availableModels, setAvailableModels] = useState([]);
+  const [loadingModels, setLoadingModels] = useState(false);
+
+  React.useEffect(() => {
+    let isMounted = true;
+    const fetchModels = async () => {
+      setAvailableModels([]);
+      if (!apiKey && provider !== 'openrouter') {
+        return;
+      }
+      setLoadingModels(true);
+      try {
+        if (provider === 'google') {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+          const data = await res.json();
+          if (data.models && isMounted) {
+            setAvailableModels(data.models.map(m => ({ id: m.name.replace('models/', ''), name: m.displayName || m.name })));
+          }
+        } else if (provider === 'openrouter') {
+          const res = await fetch('https://openrouter.ai/api/v1/models');
+          const data = await res.json();
+          if (data.data && isMounted) {
+            setAvailableModels(data.data.map(m => ({ id: m.id, name: m.name })).slice(0, 100));
+          }
+        } else if (provider === 'openai') {
+          const res = await fetch('https://api.openai.com/v1/models', {
+            headers: { 'Authorization': `Bearer ${apiKey}` }
+          });
+          const data = await res.json();
+          if (data.data && isMounted) {
+            setAvailableModels(data.data.filter(m => m.id.includes('gpt')).map(m => ({ id: m.id, name: m.id })));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch models", err);
+      } finally {
+        if (isMounted) setLoadingModels(false);
+      }
+    };
+    
+    fetchModels();
+    return () => { isMounted = false; };
+  }, [provider, apiKey]);
 
   const sources = [
     { id: 'social', label: language === 'Español' ? 'Redes Sociales' : 'Social Media', icon: '📱' },
@@ -137,15 +180,23 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
             </div>
 
             <div>
-              <label htmlFor="model-id" className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2 px-1">Model ID</label>
-              <input
+              <label htmlFor="model-id" className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2 px-1">Model ID {loadingModels && "(Loading...)"}</label>
+              <select
                 id="model-id"
-                type="text"
                 value={modelId}
                 onChange={(e) => setLocalModelId(e.target.value)}
-                placeholder="e.g. gemini-2.0-flash"
                 className="w-full h-14 px-4 rounded-2xl bg-[#121212] border border-white/10 text-white focus:outline-none focus:border-yellow-500 transition-all text-sm"
-              />
+              >
+                {!apiKey && provider !== 'openrouter' ? (
+                  <option value={modelId}>{modelId} (Enter API Key for more)</option>
+                ) : availableModels.length > 0 ? (
+                  availableModels.map(m => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))
+                ) : (
+                  <option value={modelId}>{modelId}</option>
+                )}
+              </select>
             </div>
           </div>
         </div>
