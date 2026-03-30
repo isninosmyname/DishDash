@@ -63,7 +63,9 @@
 
 ---
 # Screenshots
-<img width="1103" height="695" alt="image" src="https://github.com/user-attachments/assets/ab7212a9-465c-48f0-965c-cf497ff182f3" />
+<img width="1280" height="800" alt="Captura de Pantalla 2026-03-30 a la(s) 8 15 17 a m" src="https://github.com/user-attachments/assets/0c1a82d1-6d79-424d-9710-c570429b0d58" />
+
+<img width="263" height="588" alt="image" src="https://github.com/user-attachments/assets/8063b075-3936-4c14-a349-b7b66c85993f" />
 
 
 ---
