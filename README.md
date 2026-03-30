@@ -2,14 +2,21 @@
 
 **DishDash** is a minimalist, AI-powered recipe generator designed to help you cook with what you have.
 
+> Proyect created for the [Hackaton Midudev + CubePath 2026](https://github.com/midudev/hackaton-cubepath-2026), read my project in the [Issue #189](https://github.com/midudev/hackaton-cubepath-2026/issues/189). you can try the project at
+> http://disdash-backend-anz1fa-1af0fe-144-225-147-49.traefik.me/.
+---
+
+## URL
+http://disdash-backend-anz1fa-1af0fe-144-225-147-49.traefik.me/
+
 ---
 
 ## Features
 
-- ** AI-Powered Recipes**: Generates creative meals based on the ingredients you provide.
-- ** Multi-Language Support**: Currently supports English and Español.
-- ** Neo-Brutalist Design**: A bold, high-contrast, minimalist interface.
-- ** Save & Share**: Easily copy recipes to your clipboard or share them directly.
+- **AI-Powered Recipes**: Generates creative meals based on the ingredients you provide.
+- **Multi-Language Support**: Currently supports English and Español.
+- **Neo-Brutalist Design**: A very good desing.  futuristic, 2026 style.
+- **Save**: Easily copy recipes to your clipboard.
 
 ---
 
@@ -39,7 +46,7 @@
    npm run dev
    ```
 
-4. Open your browser to the local server address  `http://localhost:5173`
+4. Open your browser to the local server address  `http://localhost:3000`
 
 ---
 
@@ -63,7 +70,9 @@
 
 ---
 # Screenshots
-<img width="1103" height="695" alt="image" src="https://github.com/user-attachments/assets/ab7212a9-465c-48f0-965c-cf497ff182f3" />
+<img width="1280" height="800" alt="Captura de Pantalla 2026-03-30 a la(s) 8 15 17 a m" src="https://github.com/user-attachments/assets/0c1a82d1-6d79-424d-9710-c570429b0d58" />
+
+<img width="263" height="588" alt="image" src="https://github.com/user-attachments/assets/8063b075-3936-4c14-a349-b7b66c85993f" />
 
 
 ---
