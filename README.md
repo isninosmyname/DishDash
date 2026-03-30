@@ -2,6 +2,7 @@
 
 **DishDash** is a minimalist, AI-powered recipe generator designed to help you cook with what you have.
 
+> Proyect created for the [Hackaton Midudev + CubePath 2026](https://github.com/midudev/hackaton-cubepath-2026), read my project in the [Issue #189](https://github.com/midudev/hackaton-cubepath-2026/issues/189). Puedes probar el proyecto en [http://disdash-backend-anz1fa-1af0fe-144-225-147-49.traefik.me/]([https://ctai.marcvspt.tech](http://disdash-backend-anz1fa-1af0fe-144-225-147-49.traefik.me/)).
 ---
 
 ## URL
@@ -11,10 +12,10 @@ http://disdash-backend-anz1fa-1af0fe-144-225-147-49.traefik.me/
 
 ## Features
 
-- ** AI-Powered Recipes**: Generates creative meals based on the ingredients you provide.
-- ** Multi-Language Support**: Currently supports English and Español.
-- ** Neo-Brutalist Design**: A very good desing.  futuristic, 2026 style.
-- ** Save **: Easily copy recipes to your clipboard.
+- **AI-Powered Recipes**: Generates creative meals based on the ingredients you provide.
+- **Multi-Language Support**: Currently supports English and Español.
+- **Neo-Brutalist Design**: A very good desing.  futuristic, 2026 style.
+- **Save**: Easily copy recipes to your clipboard.
 
 ---
 
