@@ -4,12 +4,17 @@
 
 ---
 
+## URL
+http://disdash-backend-anz1fa-1af0fe-144-225-147-49.traefik.me/
+
+---
+
 ## Features
 
 - ** AI-Powered Recipes**: Generates creative meals based on the ingredients you provide.
 - ** Multi-Language Support**: Currently supports English and Español.
-- ** Neo-Brutalist Design**: A bold, high-contrast, minimalist interface.
-- ** Save & Share**: Easily copy recipes to your clipboard or share them directly.
+- ** Neo-Brutalist Design**: A very good desing.  futuristic, 2026 style.
+- ** Save **: Easily copy recipes to your clipboard.
 
 ---
 
@@ -39,7 +44,7 @@
    npm run dev
    ```
 
-4. Open your browser to the local server address  `http://localhost:5173`
+4. Open your browser to the local server address  `http://localhost:3000`
 
 ---
 
