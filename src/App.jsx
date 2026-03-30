@@ -5,7 +5,7 @@ import Hero from './components/Hero';
 import FilterSection from './components/FilterSection';
 import FeaturedCards from './components/FeaturedCards';
 import RecipeList from './components/RecipeList';
-import WelcomeScreen from './components/WelcomeScreen';
+import Onboarding from './components/Onboarding';
 import Toast from './components/Toast';
 import { X, Copy, Heart, Activity, Volume2, Square, ShoppingCart, CheckCircle2, Circle, Share, Flame } from 'lucide-react';
 
@@ -53,8 +53,8 @@ const uiTranslations = {
     craftedBy: "Crafted by DishDash AI",
     healthHeading: "Health Analysis",
     scoreLabel: "SCORE",
-    sidebar: { home: "Home", favs: "Favorites", recent: "Recent Searches", settings: "Settings", profile: "Chef's Table" },
-    filterImage: "IMAGE UPLOAD",
+    sidebar: { home: "Home", favs: "Favorites", recent: "Recent Searches", settings: "Settings", profile: "My Kitchen" },
+    filterImage: "SCAN INGREDIENTS",
     shoppingList: "Shopping List",
     generating: "Generating...",
     noItems: "No items found",
@@ -66,7 +66,8 @@ const uiTranslations = {
     password: "Password",
     getStarted: "Enter Kitchen",
     copied: "Copied to Clipboard",
-    fillAll: "Please fill out all fields"
+    fillAll: "Please fill out all fields",
+    setupHint: "Please enter your API Key to start cooking!"
   },
   Español: { 
     language: "Idioma", 
@@ -103,8 +104,8 @@ const uiTranslations = {
     craftedBy: "Creado por DishDash AI",
     healthHeading: "Análisis de Salud",
     scoreLabel: "PUNTOS",
-    sidebar: { home: "Inicio", favs: "Favoritos", recent: "Búsquedas", settings: "Ajustes", profile: "Mesa del Chef" },
-    filterImage: "SUBIR IMAGEN",
+    sidebar: { home: "Inicio", favs: "Favoritos", recent: "Búsquedas", settings: "Ajustes", profile: "Mi Cocina" },
+    filterImage: "ESCANEAR INGREDIENTES",
     shoppingList: "Lista de Compras",
     generating: "Generando...",
     noItems: "Sin artículos",
@@ -116,7 +117,8 @@ const uiTranslations = {
     password: "Contraseña",
     getStarted: "Entrar a la Cocina",
     copied: "Copiado al Portapapeles",
-    fillAll: "Por favor complete todos los campos"
+    fillAll: "Por favor complete todos los campos",
+    setupHint: "¡Por favor ingrese su clave API para comenzar a cocinar!"
   }
 };
 
@@ -142,7 +144,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('Home');
   const [shoppingList, setShoppingList] = useState(null);
   const [generatingList, setGeneratingList] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem('dishdash_auth') === 'true');
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isOnboarded, setIsOnboarded] = useState(localStorage.getItem('dishdash_onboarded') === 'true');
   const [user, setUser] = useState(localStorage.getItem('dishdash_user') || "");
   const [toasts, setToasts] = useState([]);
 
@@ -156,6 +159,7 @@ export default function App() {
   };
 
   const mainContentRef = useRef(null);
+  const initialMount = useRef(true);
 
   const ui = uiTranslations[language] || uiTranslations.English;
 
@@ -167,9 +171,14 @@ export default function App() {
     localStorage.setItem('dishdash_favs', JSON.stringify(favorites));
     localStorage.setItem('dishdash_theme', theme);
     localStorage.setItem('dishdash_auth', isAuthenticated);
+    localStorage.setItem('dishdash_onboarded', isOnboarded);
     localStorage.setItem('dishdash_user', user);
     document.documentElement.lang = language === 'Español' ? 'es' : 'en';
-  }, [apiKey, provider, modelId, history, favorites, theme, isAuthenticated, user, language]);
+  }, [apiKey, provider, modelId, history, favorites, theme, isAuthenticated, isOnboarded, user, language]);
+
+  useEffect(() => {
+    initialMount.current = false;
+  }, []);
 
   const callAI = async (payload, isVision = false) => {
     if (provider === "google") {
@@ -373,16 +382,28 @@ export default function App() {
     }
   };
 
-  if (!isAuthenticated) {
+  if (!isOnboarded) {
     return (
-      <WelcomeScreen 
+      <Onboarding 
         language={language}
         setLanguage={setLanguage}
-        ui={ui}
         showToast={showToast}
-        onLogin={(name) => {
-          setUser(name);
-          setIsAuthenticated(true);
+        onComplete={(data) => {
+          setApiKey(data.apiKey);
+          setProvider(data.provider);
+          setModelId(data.modelId);
+          setIsOnboarded(true);
+          
+          if (!data.apiKey) {
+            setTimeout(() => {
+              showToast(
+                language === 'Español' 
+                  ? "Recuerda: Puedes configurar tu API Key después en Ajustes." 
+                  : "Reminder: You can set up your API Key later in Settings.",
+                'info'
+              );
+            }, 1500);
+          }
         }}
       />
     );
@@ -606,7 +627,7 @@ export default function App() {
         {showSettings && (
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 animate-fade-in">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setShowSettings(false)} />
-            <div className="relative w-full max-w-md glass rounded-[32px] p-8 space-y-6">
+            <div className="relative w-full max-w-md bg-[#121212] border border-white/10 rounded-[32px] p-8 space-y-6">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-xl font-black tracking-tight uppercase">Settings</h3>
                 <button onClick={() => setShowSettings(false)} className="text-white/40 hover:text-white"><X size={20} /></button>

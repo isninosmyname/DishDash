@@ -21,8 +21,8 @@ export default function Sidebar({ activeTab, onNavigate, language, setLanguage, 
         </div>
 
           <div className="mb-10 flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-black font-bold uppercase">
-              {(user || "CT").slice(0, 2)}
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-black font-bold uppercase text-xs">
+              {user ? user.slice(0, 2) : "MK"}
             </div>
             <div>
               <h3 className="text-white text-sm font-bold truncate max-w-[120px]">{user || ui.sidebar.profile}</h3>

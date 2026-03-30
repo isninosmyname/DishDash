@@ -24,7 +24,7 @@ export default function Toast({ id, message, type = 'error', onRemove }) {
   };
 
   return (
-    <div className={`glass flex items-center gap-3 p-4 rounded-2xl border ${colors[type]} shadow-2xl animate-slide-in pointer-events-auto min-w-[300px] max-w-md group`}>
+    <div className={`bg-[#1A1A1A] flex items-center gap-3 p-4 rounded-2xl border ${colors[type]} shadow-2xl animate-slide-in pointer-events-auto min-w-[300px] max-w-md group`}>
       <div className="shrink-0">
         {icons[type]}
       </div>

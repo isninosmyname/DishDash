@@ -60,8 +60,8 @@ export default function FilterSection({
         </div>
       ))}
 
-      <label className="bg-white/5 border-2 border-dashed border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-white/10 hover:border-yellow-500/50 transition-all duration-300 group">
-        <input type="file" accept="image/*" className="hidden" onChange={onImageUpload} />
+      <label htmlFor="image-upload-input" className="bg-white/5 border-2 border-dashed border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-white/10 hover:border-yellow-500/50 transition-all duration-300 group">
+        <input id="image-upload-input" type="file" accept="image/*" className="hidden" onChange={onImageUpload} />
         <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-white/40 group-hover:text-yellow-500 transition-colors">
           <Camera size={24} />
         </div>
