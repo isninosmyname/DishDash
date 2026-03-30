@@ -21,7 +21,7 @@ export default function FilterSection({
       onChange: (e) => setLanguage(e.target.value)
     },
     { 
-      label: ui.history.toUpperCase(), 
+      label: ui.mode.toUpperCase(), 
       value: mode, 
       icon: <Zap size={18} className="text-green-500 fill-green-500" />, 
       options: [

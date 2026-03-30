@@ -5,7 +5,9 @@ import Hero from './components/Hero';
 import FilterSection from './components/FilterSection';
 import FeaturedCards from './components/FeaturedCards';
 import RecipeList from './components/RecipeList';
-import { X, Copy, Heart, Activity, Volume2, Square } from 'lucide-react';
+import WelcomeScreen from './components/WelcomeScreen';
+import Toast from './components/Toast';
+import { X, Copy, Heart, Activity, Volume2, Square, ShoppingCart, CheckCircle2, Circle, Share, Flame } from 'lucide-react';
 
 const ingredientPools = { 
   base: ["chicken", "eggs", "rice", "pasta", "potato", "beans"], 
@@ -22,7 +24,7 @@ const uiTranslations = {
     loading: "Whisking...", 
     settings: "Settings", 
     placeholder: "Pasta, Garlic, 1 Lime...", 
-    history: "Recent", 
+    mode: "Mode", 
     selectFav: "Select a Favorite...", 
     addFav: "Save to Favorites", 
     remFav: "Remove Favorite", 
@@ -52,7 +54,19 @@ const uiTranslations = {
     healthHeading: "Health Analysis",
     scoreLabel: "SCORE",
     sidebar: { home: "Home", favs: "Favorites", recent: "Recent Searches", settings: "Settings", profile: "Chef's Table" },
-    filterImage: "IMAGE UPLOAD"
+    filterImage: "IMAGE UPLOAD",
+    shoppingList: "Shopping List",
+    generating: "Generating...",
+    noItems: "No items found",
+    exportNotes: "Export to Notes",
+    shareError: "Sharing not supported",
+    welcomeTitle: "Welcome to DishDash",
+    welcomeSub: "Let's set up your kitchen",
+    username: "Username",
+    password: "Password",
+    getStarted: "Enter Kitchen",
+    copied: "Copied to Clipboard",
+    fillAll: "Please fill out all fields"
   },
   Español: { 
     language: "Idioma", 
@@ -60,7 +74,7 @@ const uiTranslations = {
     loading: "Batiendo...", 
     settings: "Ajustes", 
     placeholder: "Pasta, Ajo, 1 Limón...", 
-    history: "Recientes", 
+    mode: "Modo", 
     selectFav: "Seleccionar Favorito...", 
     addFav: "Guardar Favorito", 
     remFav: "Eliminar Favorito", 
@@ -90,7 +104,19 @@ const uiTranslations = {
     healthHeading: "Análisis de Salud",
     scoreLabel: "PUNTOS",
     sidebar: { home: "Inicio", favs: "Favoritos", recent: "Búsquedas", settings: "Ajustes", profile: "Mesa del Chef" },
-    filterImage: "SUBIR IMAGEN"
+    filterImage: "SUBIR IMAGEN",
+    shoppingList: "Lista de Compras",
+    generating: "Generando...",
+    noItems: "Sin artículos",
+    exportNotes: "Exportar a Notas",
+    shareError: "Compartir no disponible",
+    welcomeTitle: "Bienvenido a DishDash",
+    welcomeSub: "Prepara tu cocina",
+    username: "Usuario",
+    password: "Contraseña",
+    getStarted: "Entrar a la Cocina",
+    copied: "Copiado al Portapapeles",
+    fillAll: "Por favor complete todos los campos"
   }
 };
 
@@ -114,6 +140,20 @@ export default function App() {
   const [utterance, setUtterance] = useState(null);
   const [dailyRecipe, setDailyRecipe] = useState(JSON.parse(localStorage.getItem('dishdash_daily')) || null);
   const [activeTab, setActiveTab] = useState('Home');
+  const [shoppingList, setShoppingList] = useState(null);
+  const [generatingList, setGeneratingList] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(localStorage.getItem('dishdash_auth') === 'true');
+  const [user, setUser] = useState(localStorage.getItem('dishdash_user') || "");
+  const [toasts, setToasts] = useState([]);
+
+  const showToast = (message, type = 'error') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+  };
+
+  const removeToast = (id) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
 
   const mainContentRef = useRef(null);
 
@@ -126,7 +166,10 @@ export default function App() {
     localStorage.setItem('dishdash_history', JSON.stringify(history));
     localStorage.setItem('dishdash_favs', JSON.stringify(favorites));
     localStorage.setItem('dishdash_theme', theme);
-  }, [apiKey, provider, modelId, history, favorites, theme]);
+    localStorage.setItem('dishdash_auth', isAuthenticated);
+    localStorage.setItem('dishdash_user', user);
+    document.documentElement.lang = language === 'Español' ? 'es' : 'en';
+  }, [apiKey, provider, modelId, history, favorites, theme, isAuthenticated, user, language]);
 
   const callAI = async (payload, isVision = false) => {
     if (provider === "google") {
@@ -167,6 +210,7 @@ export default function App() {
       const text = await callAI(prompt);
       setRecipe(text);
       setHistory(prev => [text, ...prev].slice(0, 10));
+      setShoppingList(null);
     } catch (error) {
       setRecipe(`Error: ${error.message}`);
     } finally {
@@ -186,9 +230,72 @@ export default function App() {
         bullets: result.replace(/SCORE:\s*\d+/i, '').trim()
       });
     } catch {
-      alert("Health analysis failed");
+      showToast("Health analysis failed");
     } finally {
       setAnalyzingHealth(false);
+    }
+  };
+
+  const handleGenerateShoppingList = async () => {
+    if (!recipe || !apiKey) return;
+    setGeneratingList(true);
+    try {
+      const prompt = `Convert this recipe into a categorized shopping list. 
+      RECIPE: ${recipe}
+      CATEGORIES: Produce, Meat/Protein, Dairy, Pantry, Other.
+      OUTPUT: Return ONLY a JSON array of objects. 
+      FORMAT: [{"category": "Category Name", "items": [{"name": "Item", "amount": "Quantity"}]}]
+      LANGUAGE: ${language}`;
+      
+      const result = await callAI(prompt);
+      const jsonMatch = result.match(/\[[\s\S]*\]/);
+      
+      if (!jsonMatch) {
+        throw new Error("Invalid AI response format");
+      }
+      
+      const parsed = JSON.parse(jsonMatch[0]).map((cat, cIdx) => ({
+        category: cat.category || "General",
+        items: (cat.items || []).map((item, iIdx) => ({
+          name: item.name || "Unknown item",
+          amount: item.amount || "",
+          id: `${cIdx}-${iIdx}-${Date.now()}`,
+          checked: false
+        }))
+      })).filter(cat => cat.items.length > 0);
+
+      if (parsed.length === 0) throw new Error("No ingredients detected");
+      
+      setShoppingList(parsed);
+    } catch (err) {
+      console.error("Shopping List Error:", err);
+      showToast(`Error: ${err.message}. Please try again.`);
+    } finally {
+      setGeneratingList(false);
+    }
+  };
+
+  const handleExportToNotes = async () => {
+    if (!shoppingList) return;
+    const recipeTitle = recipe.split('\n')[0].replace('# ', '');
+    const listText = shoppingList.map(cat => 
+      `${cat.category.toUpperCase()}\n${cat.items.map(i => `- ${i.name} (${i.amount})`).join('\n')}`
+    ).join('\n\n');
+    
+    const fullContent = `SHOPPING LIST: ${recipeTitle}\n\n${listText}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Shopping List - ${recipeTitle}`,
+          text: fullContent,
+        });
+      } catch (err) {
+        if (err.name !== 'AbortError') showToast(ui.shareError);
+      }
+    } else {
+      await navigator.clipboard.writeText(fullContent);
+      showToast(ui.copied + " (Clipboard fallback)", "info");
     }
   };
 
@@ -214,7 +321,7 @@ export default function App() {
       localStorage.setItem('dishdash_daily', JSON.stringify(data));
       setRecipe(text);
     } catch (err) {
-      alert(err.message);
+      showToast(err.message);
     } finally {
       setLoading(false);
     }
@@ -236,7 +343,7 @@ export default function App() {
         setIngredients(detected);
         generateRecipe(detected);
       } catch (err) {
-        alert(err.message);
+        showToast(err.message);
       } finally {
         setLoading(false);
       }
@@ -266,6 +373,21 @@ export default function App() {
     }
   };
 
+  if (!isAuthenticated) {
+    return (
+      <WelcomeScreen 
+        language={language}
+        setLanguage={setLanguage}
+        ui={ui}
+        showToast={showToast}
+        onLogin={(name) => {
+          setUser(name);
+          setIsAuthenticated(true);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="flex bg-[#0A0A0A] min-h-screen text-white font-sans selection:bg-yellow-500/30">
       <Sidebar 
@@ -276,6 +398,7 @@ export default function App() {
         setLanguage={setLanguage}
         setShowSettings={setShowSettings}
         ui={ui}
+        user={user}
       />
 
       <main className="flex-1 overflow-y-auto pb-32 md:pb-0" ref={mainContentRef}>
@@ -386,6 +509,15 @@ export default function App() {
                     {listening ? <Square size={14} className="md:w-4 md:h-4" /> : <Volume2 size={14} className="md:w-4 md:h-4" />}
                     <span className="hidden xs:inline">{listening ? ui.stop : ui.listen}</span>
                   </button>
+
+                  <button
+                    onClick={handleGenerateShoppingList}
+                    disabled={generatingList}
+                    className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-yellow-500/20 border border-yellow-500/20 text-yellow-500 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-yellow-500/30"
+                  >
+                    <ShoppingCart size={14} className="md:w-4 md:h-4" />
+                    <span className="hidden xs:inline">{generatingList ? ui.generating : ui.shoppingList}</span>
+                  </button>
                 </div>
 
                 {healthData && (
@@ -407,6 +539,58 @@ export default function App() {
                     </div>
                     <div className="prose prose-invert prose-xs md:prose-sm max-w-none text-white/60">
                       <Markdown>{healthData.bullets}</Markdown>
+                    </div>
+                  </div>
+                )}
+
+                {shoppingList && (
+                  <div className="p-6 md:p-8 rounded-[24px] md:rounded-[32px] bg-white/5 border border-white/10 animate-fade-in space-y-6">
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-white font-black text-base md:text-lg uppercase tracking-tight flex items-center gap-2">
+                        <ShoppingCart size={20} className="text-yellow-500" />
+                        {ui.shoppingList}
+                      </h4>
+                      <button 
+                        onClick={handleExportToNotes}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all text-[10px] font-black uppercase tracking-widest"
+                      >
+                        <Share size={14} />
+                        {ui.exportNotes}
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {shoppingList.map((category, catIdx) => (
+                        <div key={catIdx} className="space-y-3">
+                          <h5 className="text-[10px] text-white/40 font-black uppercase tracking-widest border-b border-white/5 pb-2">
+                            {category.category}
+                          </h5>
+                          <div className="space-y-2">
+                            {category.items.map((item) => (
+                              <button
+                                key={item.id}
+                                onClick={() => {
+                                  setShoppingList(prev => prev.map(cat => ({
+                                    ...cat,
+                                    items: cat.items.map(i => i.id === item.id ? { ...i, checked: !i.checked } : i)
+                                  })));
+                                }}
+                                className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-left group"
+                              >
+                                {item.checked ? 
+                                  <CheckCircle2 size={18} className="text-green-500 shrink-0" /> : 
+                                  <Circle size={18} className="text-white/20 group-hover:text-white/40 shrink-0" />
+                                }
+                                <div className="flex-1">
+                                  <span className={`text-sm font-bold ${item.checked ? 'text-white/20 line-through' : 'text-white'}`}>
+                                    {item.name}
+                                  </span>
+                                  {item.amount && <span className="text-[10px] text-white/40 block leading-tight font-medium uppercase tracking-widest">{item.amount}</span>}
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}
@@ -478,6 +662,15 @@ export default function App() {
           </div>
         )}
       </main>
+      <div className="fixed top-6 right-6 z-[300] flex flex-col gap-3 pointer-events-none">
+        {toasts.map(toast => (
+          <Toast 
+            key={toast.id} 
+            {...toast} 
+            onRemove={removeToast} 
+          />
+        ))}
+      </div>
     </div>
   );
 }

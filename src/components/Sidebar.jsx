@@ -1,7 +1,7 @@
 import React from 'react';
 import { Home, Heart, Clock, Settings, HelpCircle, Globe, ChevronDown } from 'lucide-react';
 
-export default function Sidebar({ activeTab, onNavigate, language, setLanguage, setShowSettings, ui }) {
+export default function Sidebar({ activeTab, onNavigate, language, setLanguage, setShowSettings, ui, user }) {
   const menuItems = [
     { id: 'Home', icon: Home, label: ui.sidebar.home, section: 'home' },
     { id: 'Favorites', icon: Heart, label: ui.sidebar.favs, section: 'favorites' },
@@ -21,11 +21,11 @@ export default function Sidebar({ activeTab, onNavigate, language, setLanguage, 
         </div>
 
           <div className="mb-10 flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-black font-bold">
-              CT
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-black font-bold uppercase">
+              {(user || "CT").slice(0, 2)}
             </div>
             <div>
-              <h3 className="text-white text-sm font-bold">{ui.sidebar.profile}</h3>
+              <h3 className="text-white text-sm font-bold truncate max-w-[120px]">{user || ui.sidebar.profile}</h3>
             </div>
           </div>
 
