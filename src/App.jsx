@@ -130,7 +130,7 @@ export default function App() {
   const [ingredients, setIngredients] = useState("");
   const [recipe, setRecipe] = useState("");
   const [loading, setLoading] = useState(false);
-  const [language, setLanguage] = useState("English");
+  const [language, setLanguage] = useState(localStorage.getItem('dishdash_language') || "English");
   const [copyStatus, setCopyStatus] = useState(false);
   const [history, setHistory] = useState(JSON.parse(localStorage.getItem('dishdash_history')) || []);
   const [favorites, setFavorites] = useState(JSON.parse(localStorage.getItem('dishdash_favs')) || []);
@@ -173,6 +173,7 @@ export default function App() {
     localStorage.setItem('dishdash_auth', isAuthenticated);
     localStorage.setItem('dishdash_onboarded', isOnboarded);
     localStorage.setItem('dishdash_user', user);
+    localStorage.setItem('dishdash_language', language);
     document.documentElement.lang = language === 'Español' ? 'es' : 'en';
   }, [apiKey, provider, modelId, history, favorites, theme, isAuthenticated, isOnboarded, user, language]);
 
@@ -212,6 +213,10 @@ export default function App() {
   const generateRecipe = async (inputStr) => {
     const finalIngredients = inputStr || ingredients;
     if (!finalIngredients) return;
+    if (!apiKey) {
+      showToast(ui.setupHint, 'error');
+      return;
+    }
     setLoading(true);
     setHealthData(null);
     try {
@@ -228,7 +233,11 @@ export default function App() {
   };
 
   const handleHealthCheck = async () => {
-    if (!recipe || !apiKey) return;
+    if (!recipe) return;
+    if (!apiKey) {
+      showToast(ui.setupHint, 'error');
+      return;
+    }
     setAnalyzingHealth(true);
     try {
       const prompt = `Analyze this recipe: ${recipe}. Return ONLY a score 1-100 and 3 short bullets in ${language}. Format: SCORE: [num] \n [bullets]`;
@@ -246,7 +255,11 @@ export default function App() {
   };
 
   const handleGenerateShoppingList = async () => {
-    if (!recipe || !apiKey) return;
+    if (!recipe) return;
+    if (!apiKey) {
+      showToast(ui.setupHint, 'error');
+      return;
+    }
     setGeneratingList(true);
     try {
       const prompt = `Convert this recipe into a categorized shopping list. 
@@ -321,6 +334,10 @@ export default function App() {
       setRecipe(dailyRecipe.recipe);
       return;
     }
+    if (!apiKey) {
+      showToast(ui.setupHint, 'error');
+      return;
+    }
     setLoading(true);
     try {
       const prompt = `Daily special recipe idea (${mode}). Language: ${language}`;
@@ -338,7 +355,11 @@ export default function App() {
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
-    if (!file || !apiKey) return;
+    if (!file) return;
+    if (!apiKey) {
+      showToast(ui.setupHint, 'error');
+      return;
+    }
     const reader = new FileReader();
     reader.onloadend = async () => {
       setLoading(true);

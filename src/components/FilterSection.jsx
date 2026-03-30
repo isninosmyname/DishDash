@@ -41,14 +41,14 @@ export default function FilterSection({
           <label htmlFor={`filter-${filter.label}`} className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-3">
             {filter.label}
           </label>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-3 w-full">
               {filter.icon}
               <select 
                 id={`filter-${filter.label}`}
                 value={filter.value} 
                 onChange={filter.onChange}
-                className="bg-transparent text-white text-sm font-bold appearance-none focus:outline-none cursor-pointer pr-8"
+                className="bg-transparent text-white text-sm font-bold appearance-none focus:outline-none cursor-pointer w-full pr-8"
               >
                 {filter.options.map(opt => (
                   <option key={opt.value} value={opt.value} className="bg-[#121212]">{opt.label}</option>
