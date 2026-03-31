@@ -1,4 +1,4 @@
-import { Calendar, Plus, X, Sparkles, ChefHat, Clock, Flame, Heart } from 'lucide-react';
+import { Calendar, X, Sparkles, ChefHat, Heart } from 'lucide-react';
 
 const DAYS = {
   English: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],

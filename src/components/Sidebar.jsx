@@ -52,8 +52,8 @@ export default function Sidebar({ activeTab, onNavigate, language, setLanguage, 
         </div>
       </div>
 
-      <div className="md:hidden fixed bottom-6 left-6 right-6 z-[100]">
-        <nav className="glass rounded-3xl p-2 flex items-center justify-around shadow-2xl border border-white/10">
+      <div className="md:hidden fixed bottom-4 left-4 right-4 z-[100]">
+        <nav className="bg-[#18181A] rounded-3xl p-2 flex items-center justify-between shadow-2xl border border-white/10 overflow-x-auto scrollbar-hide">
           {menuItems.map((item) => (
             <button
               key={item.id}
@@ -61,13 +61,13 @@ export default function Sidebar({ activeTab, onNavigate, language, setLanguage, 
                 if (item.id === 'Settings') setShowSettings(true);
                 else if (item.section) onNavigate(item.section);
               }}
-              className={`p-4 rounded-2xl transition-all ${
+              className={`p-3 shrink-0 rounded-2xl transition-all ${
                 activeTab === item.id 
-                  ? 'bg-yellow-500 text-black shadow-lg scale-110' 
-                  : 'text-white/60 hover:text-white'
+                  ? 'bg-yellow-500 text-black shadow-md scale-105' 
+                  : 'text-white/50 hover:text-white'
               }`}
             >
-              <item.icon size={24} className={activeTab === item.id ? 'stroke-[2.5px]' : 'stroke-2'} />
+              <item.icon size={22} className={activeTab === item.id ? 'stroke-[2.5px]' : 'stroke-2'} />
             </button>
           ))}
         </nav>

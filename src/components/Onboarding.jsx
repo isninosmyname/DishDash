@@ -10,7 +10,6 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
   const [availableModels, setAvailableModels] = useState([]);
   const [loadingModels, setLoadingModels] = useState(false);
   const [localAllergies, setLocalAllergies] = useState("");
-  const [username, setLocalUsername] = useState("");
 
   React.useEffect(() => {
     let isMounted = true;
@@ -31,7 +30,11 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
           const res = await fetch('https://openrouter.ai/api/v1/models');
           const data = await res.json();
           if (data.data && isMounted) {
-            setAvailableModels(data.data.map(m => ({ id: m.id, name: m.name })).slice(0, 100));
+            const forbiddenKeywords = ['voice', 'speech', 'tts', 'whisper', 'audio', 'vixen', 'melotts', 'bark', 'elevenlabs'];
+            const textModels = data.data.filter(m => 
+              !forbiddenKeywords.some(keyword => m.id.toLowerCase().includes(keyword) || m.name.toLowerCase().includes(keyword))
+            );
+            setAvailableModels(textModels.map(m => ({ id: m.id, name: m.name })).slice(0, 100));
           }
         } else if (provider === 'openai') {
           const res = await fetch('https://api.openai.com/v1/models', {
@@ -65,7 +68,7 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
       showToast(language === 'Español' ? "Por favor selecciona cómo nos conociste" : "Please select how you heard about us", 'error');
       return;
     }
-    if (step === 2 && !apiKey) {
+    if (step === 3 && !apiKey) {
       showToast(language === 'Español' ? "Por favor ingresa tu clave API" : "Please enter your API Key", 'error');
       return;
     }
@@ -74,7 +77,7 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
       setStep(step + 1);
     } else {
       const selectedSource = sources.find(s => s.id === sourceId)?.label || "";
-      onComplete({ apiKey, provider, modelId, source: selectedSource, username, allergies: localAllergies });
+      onComplete({ apiKey, provider, modelId, source: selectedSource, username: "", allergies: localAllergies });
     }
   };
 
@@ -139,21 +142,9 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
     },
     {
       title: language === 'Español' ? "Personaliza tu Cocina" : "Personalize Your Kitchen",
-      subtitle: language === 'Español' ? "¿Cómo te llamas y tienes alguna restricción?" : "Your name and any dietary restrictions we should know.",
+      subtitle: language === 'Español' ? "¿Tienes alguna restricción alimentaria?" : "Any dietary restrictions we should know about.",
       content: (
         <div className="space-y-6">
-          <div>
-            <label className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2 px-1">
-              {language === 'Español' ? 'Tu Nombre' : 'Your Name'}
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setLocalUsername(e.target.value)}
-              placeholder="e.g. Chef Mario"
-              className="w-full h-14 px-4 rounded-2xl bg-[#121212] border border-white/10 text-white focus:outline-none focus:border-yellow-500 transition-all text-sm"
-            />
-          </div>
           <div>
             <label className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2 px-1">
               {language === 'Español' ? 'Alergias / Restricciones' : 'Allergies / Restrictions'}
@@ -162,7 +153,7 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
               value={localAllergies}
               onChange={(e) => setLocalAllergies(e.target.value)}
               placeholder={language === 'Español' ? 'Maníes, Gluten...' : 'Peanuts, Gluten...'}
-              className="w-full h-24 p-4 rounded-2xl bg-[#121212] border border-white/10 text-white focus:outline-none focus:border-yellow-500 transition-all text-sm resize-none"
+              className="w-full h-32 p-4 rounded-2xl bg-[#121212] border border-white/10 text-white focus:outline-none focus:border-yellow-500 transition-all text-sm resize-none"
             />
           </div>
         </div>

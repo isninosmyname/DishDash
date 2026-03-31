@@ -209,7 +209,11 @@ export default function App() {
           const res = await fetch('https://openrouter.ai/api/v1/models');
           const data = await res.json();
           if (data.data && isMounted) {
-            setAvailableModels(data.data.map(m => ({ id: m.id, name: m.name })).slice(0, 100)); 
+            const forbiddenKeywords = ['voice', 'speech', 'tts', 'whisper', 'audio', 'vixen', 'melotts', 'bark', 'elevenlabs'];
+            const textModels = data.data.filter(m => 
+              !forbiddenKeywords.some(keyword => m.id.toLowerCase().includes(keyword) || m.name.toLowerCase().includes(keyword))
+            );
+            setAvailableModels(textModels.map(m => ({ id: m.id, name: m.name })).slice(0, 100)); 
           }
         } else if (provider === 'openai') {
           const res = await fetch('https://api.openai.com/v1/models', {
