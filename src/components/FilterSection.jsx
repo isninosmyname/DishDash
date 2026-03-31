@@ -1,4 +1,3 @@
-import React from 'react';
 import { ChevronDown, Globe, Zap, Camera } from 'lucide-react';
 
 export default function FilterSection({ 
@@ -39,25 +38,25 @@ export default function FilterSection({
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 px-6 mb-16">
       {filters.map((filter) => (
-        <div key={filter.label} className="bg-white/5 border border-white/5 rounded-2xl p-6 relative group transition-all duration-300 hover:bg-white/10">
-          <label htmlFor={`filter-${filter.label}`} className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-3">
+        <div key={filter.label} className="bg-white/5 border border-white/5 rounded-2xl p-4 md:p-6 relative group transition-all duration-300 hover:bg-white/10">
+          <label htmlFor={`filter-${filter.label}`} className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2 md:mb-3">
             {filter.label}
           </label>
           <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-3 w-full">
+            <div className="flex items-center gap-2 md:gap-3 w-full">
               {filter.icon}
               <select 
                 id={`filter-${filter.label}`}
                 value={filter.value} 
                 onChange={filter.onChange}
-                className="bg-transparent text-white text-sm font-bold appearance-none focus:outline-none cursor-pointer w-full pr-8"
+                className="bg-transparent text-white text-[12px] md:text-sm font-bold appearance-none focus:outline-none cursor-pointer w-full pr-6"
               >
                 {filter.options.map(opt => (
                   <option key={opt.value} value={opt.value} className="bg-[#121212]">{opt.label}</option>
                 ))}
               </select>
             </div>
-            <ChevronDown size={18} className="text-[#FFD700] absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown size={14} className="text-[#FFD700] absolute right-4 md:right-6 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
         </div>
       ))}

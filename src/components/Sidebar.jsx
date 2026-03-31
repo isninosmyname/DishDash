@@ -1,10 +1,10 @@
-import React from 'react';
-import { Home, Heart, Clock, Settings, HelpCircle, Globe, ChevronDown } from 'lucide-react';
+import { Home, Heart, Clock, Settings, HelpCircle, Globe, ChevronDown, Archive } from 'lucide-react';
 
 export default function Sidebar({ activeTab, onNavigate, language, setLanguage, setShowSettings, ui, user }) {
   const menuItems = [
     { id: 'Home', icon: Home, label: ui.sidebar.home, section: 'home' },
     { id: 'Favorites', icon: Heart, label: ui.sidebar.favs, section: 'favorites' },
+    { id: 'Pantry', icon: Archive, label: ui.sidebar.pantry, section: 'pantry' },
     { id: 'Recent', icon: Clock, label: ui.sidebar.recent, section: 'recent' },
     { id: 'Settings', icon: Settings, label: ui.sidebar.settings },
   ];

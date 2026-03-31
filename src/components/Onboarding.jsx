@@ -9,6 +9,8 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
   const [modelId, setLocalModelId] = useState("gemini-2.0-flash");
   const [availableModels, setAvailableModels] = useState([]);
   const [loadingModels, setLoadingModels] = useState(false);
+  const [localAllergies, setLocalAllergies] = useState("");
+  const [username, setLocalUsername] = useState("");
 
   React.useEffect(() => {
     let isMounted = true;
@@ -69,11 +71,11 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
       return;
     }
 
-    if (step < 2) {
+    if (step < 3) {
       setStep(step + 1);
     } else {
       const selectedSource = sources.find(s => s.id === sourceId)?.label || "";
-      onComplete({ apiKey, provider, modelId, source: selectedSource });
+      onComplete({ apiKey, provider, modelId, source: selectedSource, username, allergies: localAllergies });
     }
   };
 
@@ -100,14 +102,14 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
               <button
                 key={l}
                 onClick={() => setLanguage(l)}
-                className={`flex-1 flex flex-col items-center gap-4 p-8 rounded-3xl border transition-all duration-500 ${
+                className={`flex-1 flex flex-col items-center gap-2 md:gap-4 p-4 md:p-8 rounded-3xl border transition-all duration-500 ${
                   language === l 
                     ? 'bg-yellow-500 border-yellow-400 text-black shadow-[0_0_30px_rgba(255,215,0,0.2)] scale-105' 
                     : 'bg-[#121212] border-white/10 text-white/40 hover:bg-[#1A1A1A]'
                 }`}
               >
-                <Globe size={32} />
-                <span className="font-black uppercase tracking-widest text-xs">{l === 'English' ? 'English (US)' : 'Español'}</span>
+                <Globe size={24} className="md:w-8 md:h-8" />
+                <span className="font-black uppercase tracking-widest text-[9px] md:text-xs">{l === 'English' ? 'English (US)' : 'Español'}</span>
               </button>
             ))}
           </div>
@@ -137,6 +139,37 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
       )
     },
     {
+      title: language === 'Español' ? "Personaliza tu Cocina" : "Personalize Your Kitchen",
+      subtitle: language === 'Español' ? "¿Cómo te llamas y tienes alguna restricción?" : "Your name and any dietary restrictions we should know.",
+      content: (
+        <div className="space-y-6">
+          <div>
+            <label className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2 px-1">
+              {language === 'Español' ? 'Tu Nombre' : 'Your Name'}
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setLocalUsername(e.target.value)}
+              placeholder="e.g. Chef Mario"
+              className="w-full h-14 px-4 rounded-2xl bg-[#121212] border border-white/10 text-white focus:outline-none focus:border-yellow-500 transition-all text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2 px-1">
+              {language === 'Español' ? 'Alergias / Restricciones' : 'Allergies / Restrictions'}
+            </label>
+            <textarea
+              value={localAllergies}
+              onChange={(e) => setLocalAllergies(e.target.value)}
+              placeholder={language === 'Español' ? 'Maníes, Gluten...' : 'Peanuts, Gluten...'}
+              className="w-full h-24 p-4 rounded-2xl bg-[#121212] border border-white/10 text-white focus:outline-none focus:border-yellow-500 transition-all text-sm resize-none"
+            />
+          </div>
+        </div>
+      )
+    },
+    {
       title: language === 'Español' ? "Configura tu IA" : "Your API Key",
       subtitle: language === 'Español' ? "Conecta el cerebro de tu cocina" : "Connect the brain of your kitchen to start cooking.",
       content: (
@@ -144,7 +177,7 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
           <div className="space-y-4">
             <div>
               <label className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2 px-1">Provider</label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="flex flex-wrap md:grid md:grid-cols-3 gap-2">
                 {['google', 'openai', 'openrouter'].map((p) => (
                   <button
                     key={p}
@@ -152,7 +185,7 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
                       setLocalProvider(p);
                       setLocalModelId(p === 'google' ? 'gemini-2.0-flash' : p === 'openai' ? 'gpt-4o' : '');
                     }}
-                    className={`py-3 rounded-xl border text-[10px] font-black uppercase transition-all ${
+                    className={`flex-1 py-3 px-2 rounded-xl border text-[9px] md:text-[10px] font-black uppercase transition-all ${
                       provider === p 
                         ? 'bg-white/10 border-white/40 text-white' 
                         : 'bg-[#121212] border-white/5 text-white/20'
@@ -207,7 +240,7 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
   const currentStep = steps[step];
 
   return (
-    <div className="fixed inset-0 z-[500] bg-[#0A0A0A] overflow-y-auto scrollbar-hide py-32 px-6">
+    <div className="fixed inset-0 z-[500] bg-[#0A0A0A] overflow-y-auto scrollbar-hide py-20 md:py-32 px-6">
       <div className="fixed top-0 left-0 w-full p-8 flex justify-between items-center bg-[#0A0A0A] z-[510] border-b border-white/5 backdrop-blur-md">
         <div className="flex items-center gap-3">
           <img src="/logo.png" alt="Logo" className="w-8 h-8 rounded-lg shadow-lg" />
@@ -260,7 +293,7 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
           </button>
         </div>
 
-        {step > 0 && (
+        {step > 0 && step < 3 && (
           <button
             onClick={handleSkip}
             className="w-full mt-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-white/60 transition-all py-2"

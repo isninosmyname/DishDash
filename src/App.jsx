@@ -7,7 +7,9 @@ import FeaturedCards from './components/FeaturedCards';
 import RecipeList from './components/RecipeList';
 import Onboarding from './components/Onboarding';
 import Toast from './components/Toast';
-import { X, Copy, Heart, Activity, Volume2, Square, ShoppingCart, CheckCircle2, Circle, Share, Flame } from 'lucide-react';
+import CookingMode from './components/CookingMode';
+import PantryView from './components/PantryView';
+import { X, Copy, Heart, Activity, Volume2, Square, ShoppingCart, CheckCircle2, Circle, Share, Flame, ChefHat } from 'lucide-react';
 
 const ingredientPools = { 
   base: ["chicken", "eggs", "rice", "pasta", "potato", "beans"], 
@@ -53,7 +55,7 @@ const uiTranslations = {
     craftedBy: "Crafted by DishDash AI",
     healthHeading: "Health Analysis",
     scoreLabel: "SCORE",
-    sidebar: { home: "Home", favs: "Favorites", recent: "Recent Searches", settings: "Settings", profile: "My Kitchen" },
+    sidebar: { home: "Home", favs: "Favorites", recent: "Recent Searches", settings: "Settings", profile: "My Kitchen", pantry: "Pantry" },
     filterImage: "SCAN INGREDIENTS",
     shoppingList: "Shopping List",
     generating: "Generating...",
@@ -67,7 +69,10 @@ const uiTranslations = {
     getStarted: "Enter Kitchen",
     copied: "Copied to Clipboard",
     fillAll: "Please fill out all fields",
-    setupHint: "Please enter your API Key to start cooking!"
+    setupHint: "Please enter your API Key to start cooking!",
+    startCooking: "Start Cooking",
+    allergies: "Allergies",
+    allergiesHint: "Peanuts, Gluten, Dairy..."
   },
   Español: { 
     language: "Idioma", 
@@ -104,7 +109,7 @@ const uiTranslations = {
     craftedBy: "Creado por DishDash AI",
     healthHeading: "Análisis de Salud",
     scoreLabel: "PUNTOS",
-    sidebar: { home: "Inicio", favs: "Favoritos", recent: "Búsquedas", settings: "Ajustes", profile: "Mi Cocina" },
+    sidebar: { home: "Inicio", favs: "Favoritos", recent: "Búsquedas", settings: "Ajustes", profile: "Mi Cocina", pantry: "Despensa" },
     filterImage: "ESCANEAR INGREDIENTES",
     shoppingList: "Lista de Compras",
     generating: "Generando...",
@@ -118,7 +123,10 @@ const uiTranslations = {
     getStarted: "Entrar a la Cocina",
     copied: "Copiado al Portapapeles",
     fillAll: "Por favor complete todos los campos",
-    setupHint: "¡Por favor ingrese su clave API para comenzar a cocinar!"
+    setupHint: "¡Por favor ingrese su clave API para comenzar a cocinar!",
+    startCooking: "Empezar a Cocinar",
+    allergies: "Alergias",
+    allergiesHint: "Maníes, Gluten, Lácteos..."
   }
 };
 
@@ -150,6 +158,21 @@ export default function App() {
   const [toasts, setToasts] = useState([]);
   const [availableModels, setAvailableModels] = useState([]);
   const [loadingModels, setLoadingModels] = useState(false);
+  const [isCookingMode, setIsCookingMode] = useState(false);
+  const [allergies, setAllergies] = useState(localStorage.getItem('dishdash_allergies') || "");
+  const [pantry, setPantry] = useState(localStorage.getItem('dishdash_pantry') || "");
+
+  const extractSteps = (text) => {
+    if (!text) return [];
+    const sections = text.split(/\n(?=#{1,6}\s+)/);
+    const stepsSection = sections.find(s => /steps|instruc|prepara/i.test(s)) || text;
+    return stepsSection
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => /^(\d+[\.\)]|[\-\*])\s+/.test(line))
+      .map(line => line.replace(/^(\d+[\.\)]|[\-\*])\s+/, '').trim())
+      .filter(Boolean);
+  };
 
   const showToast = (message, type = 'error') => {
     const id = Date.now();
@@ -217,8 +240,10 @@ export default function App() {
     localStorage.setItem('dishdash_onboarded', isOnboarded);
     localStorage.setItem('dishdash_user', user);
     localStorage.setItem('dishdash_language', language);
+    localStorage.setItem('dishdash_allergies', allergies);
+    localStorage.setItem('dishdash_pantry', pantry);
     document.documentElement.lang = language === 'Español' ? 'es' : 'en';
-  }, [apiKey, provider, modelId, history, favorites, theme, isAuthenticated, isOnboarded, user, language]);
+  }, [apiKey, provider, modelId, history, favorites, theme, isAuthenticated, isOnboarded, user, language, allergies, pantry]);
 
   useEffect(() => {
     initialMount.current = false;
@@ -263,7 +288,7 @@ export default function App() {
     setLoading(true);
     setHealthData(null);
     try {
-      const prompt = `ROLE: Michelin-star Chef. \nINGREDIENTS: ${finalIngredients} \nMODE: ${mode} \nLANGUAGE: ${language} \nCONTEXT: ${ui.secret} \nFormat: # [Title] \nTime: [X] mins \nDifficulty: [E/M/H] \n## Steps \n1...`;
+      const prompt = `ROLE: Michelin-star Chef. \nINGREDIENTS: ${finalIngredients} \nPANTRY (Always Available): ${pantry || 'None'} \nMODE: ${mode} \nLANGUAGE: ${language} \nCONTEXT: ${ui.secret} \nALLERGIES: ${allergies || 'None'} \nFormat: # [Title] \nTime: [X] mins \nDifficulty: [E/M/H] \n## Steps \n1...`;
       const text = await callAI(prompt);
       setRecipe(text);
       setHistory(prev => [text, ...prev].slice(0, 10));
@@ -283,7 +308,7 @@ export default function App() {
     }
     setAnalyzingHealth(true);
     try {
-      const prompt = `Analyze this recipe: ${recipe}. Return ONLY a score 1-100 and 3 short bullets in ${language}. Format: SCORE: [num] \n [bullets]`;
+      const prompt = `Analyze this recipe: ${recipe}. Return ONLY a score 1-100 of health and 4 short bullets in ${language}. Format: SCORE: [num] \n [bullets]`;
       const result = await callAI(prompt);
       const scoreMatch = result.match(/SCORE:\s*(\d+)/i);
       setHealthData({
@@ -383,7 +408,7 @@ export default function App() {
     }
     setLoading(true);
     try {
-      const prompt = `Daily special recipe idea (${mode} mode). Language: ${language} (ONLY RETURN 1 RECIPE AND THE STEPS NO SUGGESTIONS (unlesss its the chef's secret))`;
+      const prompt = `Daily special recipe idea (${mode} mode). Language: ${language}. PANTRY (Always Available): ${pantry || 'None'}. (ONLY RETURN 1 RECIPE AND THE STEPS NO SUGGESTIONS (unlesss its the chef's secret)). AVOID THESE ALLERGIES: ${allergies || 'None'}`;
       const text = await callAI(prompt);
       const data = { date: today, recipe: text, language: language };
       setDailyRecipe(data);
@@ -439,8 +464,18 @@ export default function App() {
   };
 
   const handleNavigate = (id) => {
-    setActiveTab(id === 'home' ? 'Home' : id === 'favorites' ? 'Favorites' : 'Recent');
+    setActiveTab(id === 'home' ? 'Home' : id === 'favorites' ? 'Favorites' : id === 'pantry' ? 'Pantry' : 'Recent');
     if (mainContentRef.current) mainContentRef.current.scrollTop = 0;
+  };
+
+  const handleOnboardingComplete = (data) => {
+    setApiKey(data.apiKey);
+    setProvider(data.provider);
+    setModelId(data.modelId);
+    setUser(data.username || "");
+    setAllergies(data.allergies || "");
+    setIsOnboarded(true);
+    localStorage.setItem('dishdash_onboarded', 'true');
   };
 
   if (!isOnboarded) {
@@ -449,23 +484,7 @@ export default function App() {
         language={language}
         setLanguage={setLanguage}
         showToast={showToast}
-        onComplete={(data) => {
-          setApiKey(data.apiKey);
-          setProvider(data.provider);
-          setModelId(data.modelId);
-          setIsOnboarded(true);
-          
-          if (!data.apiKey) {
-            setTimeout(() => {
-              showToast(
-                language === 'Español' 
-                  ? "Recuerda: Puedes configurar tu API Key después en Ajustes." 
-                  : "Reminder: You can set up your API Key later in Settings.",
-                'info'
-              );
-            }, 1500);
-          }
-        }}
+        onComplete={handleOnboardingComplete}
       />
     );
   }
@@ -541,6 +560,15 @@ export default function App() {
           </div>
         )}
 
+        {activeTab === 'Pantry' && (
+          <PantryView 
+            pantry={pantry} 
+            setPantry={setPantry} 
+            language={language} 
+            ui={ui} 
+          />
+        )}
+
         {recipe && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-fade-in">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setRecipe("")} />
@@ -609,6 +637,14 @@ export default function App() {
                   >
                     <ShoppingCart size={14} className="md:w-4 md:h-4" />
                     <span className="hidden xs:inline">{generatingList ? ui.generating : ui.shoppingList}</span>
+                  </button>
+
+                  <button
+                    onClick={() => setIsCookingMode(true)}
+                    className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-yellow-500 text-black font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-yellow-400"
+                  >
+                    <ChefHat size={14} className="md:w-4 md:h-4" />
+                    <span className="hidden xs:inline">{ui.startCooking}</span>
                   </button>
                 </div>
 
@@ -755,13 +791,24 @@ export default function App() {
                     )}
                   </select>
                 </div>
+
+                <div>
+                  <label htmlFor="settings-allergies" className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2">{ui.allergies}</label>
+                  <textarea
+                    id="settings-allergies"
+                    placeholder={ui.allergiesHint}
+                    className="w-full h-20 p-4 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-yellow-500 resize-none"
+                    value={allergies}
+                    onChange={(e) => setAllergies(e.target.value)}
+                  />
+                </div>
               </div>
 
               <button 
                 onClick={() => setShowSettings(false)}
-                className="w-full h-14 rounded-2xl bg-yellow-500 text-black font-black uppercase tracking-widest text-sm hover:scale-[1.02] active:scale-[0.98] transition-all"
+                className="w-full h-14 rounded-2xl bg-yellow-500 text-black font-black uppercase tracking-widest text-xs hover:bg-yellow-400 mt-4 shadow-lg shadow-yellow-500/20"
               >
-                Save Settings
+                Save Changes
               </button>
             </div>
           </div>
@@ -776,6 +823,14 @@ export default function App() {
           />
         ))}
       </div>
+      {isCookingMode && (
+        <CookingMode 
+          steps={extractSteps(recipe)} 
+          language={language} 
+          ui={ui} 
+          onExit={() => setIsCookingMode(false)} 
+        />
+      )}
     </div>
   );
 }

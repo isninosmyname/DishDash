@@ -2,18 +2,18 @@ import { UtensilsCrossed } from 'lucide-react';
 
 export default function Hero({ ingredients, setIngredients, onRoll, loading, ui }) {
   return (
-    <div className="relative pt-12 pb-16 px-6">
+    <div className="relative pt-6 md:pt-12 pb-16 px-6">
 
-      <div className="space-y-4 mb-16">
-        <h1 className="text-4xl md:text-[72px] font-black leading-[1] md:leading-[0.9] text-white tracking-tighter">
+      <div className="space-y-4 mb-8 md:mb-16">
+        <h1 className="text-3xl md:text-[72px] font-black leading-[1] md:leading-[0.9] text-white tracking-tighter">
           {ui.heroTitle}
           <span className="block text-[#FFD700]">{ui.heroKitchen}</span>
         </h1>
       </div>
 
       <div className="relative group w-full max-w-4xl">
-        <div className="absolute inset-y-0 left-6 flex items-center text-yellow-500">
-          <UtensilsCrossed size={20} className="md:w-6 md:h-6" />
+        <div className="absolute inset-y-0 left-5 flex items-center text-yellow-500">
+          <UtensilsCrossed size={18} className="md:w-6 md:h-6" />
         </div>
         <label htmlFor="ingredients-input" className="sr-only">
           {ui.placeholder}
@@ -24,12 +24,12 @@ export default function Hero({ ingredients, setIngredients, onRoll, loading, ui 
           value={ingredients}
           onChange={(e) => setIngredients(e.target.value)}
           placeholder={ui.placeholder}
-          className="w-full h-16 md:h-24 pl-14 md:pl-16 pr-32 md:pr-44 rounded-2xl md:rounded-3xl bg-white/10 border border-white/5 text-base md:text-xl placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:bg-white/15 transition-all duration-300 backdrop-blur-md"
+          className="w-full h-14 md:h-24 pl-12 md:pl-16 pr-28 md:pr-44 rounded-xl md:rounded-3xl bg-white/10 border border-white/5 text-sm md:text-xl placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:bg-white/15 transition-all duration-300 backdrop-blur-md"
         />
         <button
           onClick={onRoll}
           disabled={loading}
-          className="absolute right-2 top-2 bottom-2 px-6 md:px-10 rounded-xl md:rounded-2xl bg-gradient-to-tr from-[#DEB3C4] via-[#DEB3C4] to-[#FCE38A] text-black font-black uppercase tracking-widest text-[10px] md:text-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group flex items-center gap-2 md:gap-3"
+          className="absolute right-2 top-2 bottom-2 px-4 md:px-10 rounded-lg md:rounded-2xl bg-gradient-to-tr from-[#DEB3C4] via-[#DEB3C4] to-[#FCE38A] text-black font-black uppercase tracking-widest text-[9px] md:text-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group flex items-center gap-2 md:gap-3"
         >
           {loading ? ui.loading : ui.button}
           <div className="hidden md:flex w-5 h-5 bg-black/10 rounded items-center justify-center">

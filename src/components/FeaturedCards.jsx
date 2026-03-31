@@ -29,8 +29,8 @@ export default function FeaturedCards({ onRandom, onDaily, ui, loading }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-6 mb-20">
       {cards.map((card) => (
-        <div key={card.title} className={`${card.bgColor} rounded-[32px] md:rounded-[40px] overflow-hidden relative group h-[400px] md:h-[480px] ${loading ? 'opacity-80 cursor-wait pointer-events-none' : 'cursor-pointer'}`} onClick={loading ? undefined : card.onClick}>
-          <img src={card.image} alt={card.title} className="absolute inset-x-0 bottom-0 w-full h-[280px] md:h-[320px] object-cover mix-blend-overlay opacity-60 group-hover:scale-105 transition-transform duration-700" />
+        <div key={card.title} className={`${card.bgColor} rounded-[32px] md:rounded-[40px] overflow-hidden relative group h-[320px] md:h-[480px] ${loading ? 'opacity-80 cursor-wait pointer-events-none' : 'cursor-pointer'}`} onClick={loading ? undefined : card.onClick}>
+          <img src={card.image} alt={card.title} className="absolute inset-x-0 bottom-0 w-full h-[240px] md:h-[320px] object-cover mix-blend-overlay opacity-60 group-hover:scale-105 transition-transform duration-700" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
           
           <div className="relative p-8 md:p-10 h-full flex flex-col justify-start items-start">
