@@ -52,7 +52,7 @@ http://disdash-backend-anz1fa-1af0fe-144-225-147-49.traefik.me/
 
 ## Usage
 
-1. Click the **Settings** button in the top right.
+1. Click the **Settings** button in the Sidebar.
 2. Choose your provider.
 3. Enter your **API Key**.
 4. Select your preferred **Language**.
@@ -63,10 +63,10 @@ http://disdash-backend-anz1fa-1af0fe-144-225-147-49.traefik.me/
 
 ## Tech Stack
 
-- **React** (Frontend Framework)
-- **Vite** (Build Tool)
-- **Tailwind CSS** (Styling)
-- **React Markdown** (Recipe Rendering)
+- **React**
+- **Vite**
+- **Tailwind CSS**
+- **React Markdown**
 
 ---
 # Screenshots
@@ -76,10 +76,9 @@ http://disdash-backend-anz1fa-1af0fe-144-225-147-49.traefik.me/
 
 
 ---
-
 # Pushes to GitHub
 
-Feel free to push to GitHub!
+Feel free to push to GitHub! (Unless I dont accept the commit! (0/o\0))
 
 ---
 
