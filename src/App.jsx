@@ -373,7 +373,7 @@ export default function App() {
 
   const generateDailyRecipe = async () => {
     const today = new Date().toDateString();
-    if (dailyRecipe && dailyRecipe.date === today) {
+    if (dailyRecipe && dailyRecipe.date === today && dailyRecipe.language === language) {
       setRecipe(dailyRecipe.recipe);
       return;
     }
@@ -385,7 +385,7 @@ export default function App() {
     try {
       const prompt = `Daily special recipe idea (${mode} mode). Language: ${language} (ONLY RETURN 1 RECIPE AND THE STEPS NO SUGGESTIONS (unlesss its the chef's secret))`;
       const text = await callAI(prompt);
-      const data = { date: today, recipe: text };
+      const data = { date: today, recipe: text, language: language };
       setDailyRecipe(data);
       localStorage.setItem('dishdash_daily', JSON.stringify(data));
       setRecipe(text);
