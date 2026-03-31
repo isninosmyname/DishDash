@@ -184,7 +184,7 @@ export default function App() {
           const res = await fetch('https://openrouter.ai/api/v1/models');
           const data = await res.json();
           if (data.data && isMounted) {
-            setAvailableModels(data.data.map(m => ({ id: m.id, name: m.name })).slice(0, 100)); // limit to 100 for perf
+            setAvailableModels(data.data.map(m => ({ id: m.id, name: m.name })).slice(0, 100)); 
           }
         } else if (provider === 'openai') {
           const res = await fetch('https://api.openai.com/v1/models', {
