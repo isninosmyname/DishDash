@@ -9,6 +9,7 @@ import Onboarding from './components/Onboarding';
 import Toast from './components/Toast';
 import CookingMode from './components/CookingMode';
 import PantryView from './components/PantryView';
+import CalendarView from './components/CalendarView';
 import { X, Copy, Heart, Activity, Volume2, Square, ShoppingCart, CheckCircle2, Circle, Share, Flame, ChefHat } from 'lucide-react';
 
 const ingredientPools = { 
@@ -55,7 +56,7 @@ const uiTranslations = {
     craftedBy: "Crafted by DishDash AI",
     healthHeading: "Health Analysis",
     scoreLabel: "SCORE",
-    sidebar: { home: "Home", favs: "Favorites", recent: "Recent Searches", settings: "Settings", profile: "My Kitchen", pantry: "Pantry" },
+    sidebar: { home: "Home", favs: "Favorites", recent: "Recent Searches", settings: "Settings", profile: "My Kitchen", pantry: "Pantry", calendar: "Planner" },
     filterImage: "SCAN INGREDIENTS",
     shoppingList: "Shopping List",
     generating: "Generating...",
@@ -109,7 +110,7 @@ const uiTranslations = {
     craftedBy: "Creado por DishDash AI",
     healthHeading: "Análisis de Salud",
     scoreLabel: "PUNTOS",
-    sidebar: { home: "Inicio", favs: "Favoritos", recent: "Búsquedas", settings: "Ajustes", profile: "Mi Cocina", pantry: "Despensa" },
+    sidebar: { home: "Inicio", favs: "Favoritos", recent: "Búsquedas", settings: "Ajustes", profile: "Mi Cocina", pantry: "Despensa", calendar: "Planificador" },
     filterImage: "ESCANEAR INGREDIENTES",
     shoppingList: "Lista de Compras",
     generating: "Generando...",
@@ -161,6 +162,7 @@ export default function App() {
   const [isCookingMode, setIsCookingMode] = useState(false);
   const [allergies, setAllergies] = useState(localStorage.getItem('dishdash_allergies') || "");
   const [pantry, setPantry] = useState(localStorage.getItem('dishdash_pantry') || "");
+  const [mealPlan, setMealPlan] = useState(JSON.parse(localStorage.getItem('dishdash_mealplan')) || {});
 
   const extractSteps = (text) => {
     if (!text) return [];
@@ -219,7 +221,6 @@ export default function App() {
           }
         }
       } catch (err) {
-        console.error("Failed to fetch models", err);
       } finally {
         if (isMounted) setLoadingModels(false);
       }
@@ -242,8 +243,9 @@ export default function App() {
     localStorage.setItem('dishdash_language', language);
     localStorage.setItem('dishdash_allergies', allergies);
     localStorage.setItem('dishdash_pantry', pantry);
+    localStorage.setItem('dishdash_mealplan', JSON.stringify(mealPlan));
     document.documentElement.lang = language === 'Español' ? 'es' : 'en';
-  }, [apiKey, provider, modelId, history, favorites, theme, isAuthenticated, isOnboarded, user, language, allergies, pantry]);
+  }, [apiKey, provider, modelId, history, favorites, theme, isAuthenticated, isOnboarded, user, language, allergies, pantry, mealPlan]);
 
   useEffect(() => {
     initialMount.current = false;
@@ -463,8 +465,54 @@ export default function App() {
     }
   };
 
+  const generateWeek = async () => {
+    if (!apiKey && provider !== 'openrouter') {
+      showToast(ui.setupHint, 'error');
+      return;
+    }
+    setLoading(true);
+    showToast(language === 'Español' ? "Generando tu semana culinary..." : "Generating your culinary week...", 'info');
+    try {
+      const prompt = `Michelin-star Chef. Generate a 7-day meal plan. Language: ${language}. Pantry (Always Available): ${pantry || 'None'}. Allergies (AVOID THESE): ${allergies || 'None'}.
+      IMPORTANT: Generate exactly 7 different recipes, one for each day.
+      Separate each recipe with the exact sequence: ---RECIPE---
+      Each recipe structure:
+      # [Title]
+      [Steps...]`;
+      
+      const text = await callAI(prompt);
+      if (!text) throw new Error(language === 'Español' ? "No se recibió respuesta de la IA" : "No response from AI");
+      
+      let recipes = text.split('---RECIPE---').map(r => r.trim()).filter(r => r.length > 20);
+      
+      if (recipes.length < 7) {
+        recipes = text.split(/\n(?=#)/).map(r => r.trim()).filter(r => r.length > 20);
+      }
+
+      const days = language === 'Español' ? ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"] : ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+      const newPlan = {};
+      
+      days.forEach((day, i) => {
+        if (recipes[i]) {
+          newPlan[day] = [recipes[i]];
+        }
+      });
+
+      if (Object.keys(newPlan).length === 0) {
+        throw new Error(language === 'Español' ? "Error al procesar el plan semanal" : "Failed to parse weekly plan");
+      }
+
+      setMealPlan(newPlan);
+      showToast(language === 'Español' ? "¡Semana generada con éxito!" : "Weekly plan generated successfully!", 'success');
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleNavigate = (id) => {
-    setActiveTab(id === 'home' ? 'Home' : id === 'favorites' ? 'Favorites' : id === 'pantry' ? 'Pantry' : 'Recent');
+    setActiveTab(id === 'home' ? 'Home' : id === 'favorites' ? 'Favorites' : id === 'pantry' ? 'Pantry' : id === 'calendar' ? 'Calendar' : 'Recent');
     if (mainContentRef.current) mainContentRef.current.scrollTop = 0;
   };
 
@@ -566,6 +614,18 @@ export default function App() {
             setPantry={setPantry} 
             language={language} 
             ui={ui} 
+          />
+        )}
+
+        {activeTab === 'Calendar' && (
+          <CalendarView 
+            mealPlan={mealPlan} 
+            setMealPlan={setMealPlan} 
+            favorites={favorites} 
+            setRecipe={setRecipe} 
+            language={language} 
+            ui={ui} 
+            onGenerateWeek={generateWeek}
           />
         )}
 

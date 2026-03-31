@@ -1,10 +1,11 @@
-import { Home, Heart, Clock, Settings, HelpCircle, Globe, ChevronDown, Archive } from 'lucide-react';
+import { Home, Heart, Clock, Settings, HelpCircle, Globe, ChevronDown, Archive, Calendar } from 'lucide-react';
 
 export default function Sidebar({ activeTab, onNavigate, language, setLanguage, setShowSettings, ui, user }) {
   const menuItems = [
     { id: 'Home', icon: Home, label: ui.sidebar.home, section: 'home' },
     { id: 'Favorites', icon: Heart, label: ui.sidebar.favs, section: 'favorites' },
     { id: 'Pantry', icon: Archive, label: ui.sidebar.pantry, section: 'pantry' },
+    { id: 'Calendar', icon: Calendar, label: ui.sidebar.calendar, section: 'calendar' },
     { id: 'Recent', icon: Clock, label: ui.sidebar.recent, section: 'recent' },
     { id: 'Settings', icon: Settings, label: ui.sidebar.settings },
   ];

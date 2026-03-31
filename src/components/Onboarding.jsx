@@ -43,7 +43,6 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
           }
         }
       } catch (err) {
-        console.error("Failed to fetch models", err);
       } finally {
         if (isMounted) setLoadingModels(false);
       }
