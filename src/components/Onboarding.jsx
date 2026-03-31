@@ -187,14 +187,14 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
                 onChange={(e) => setLocalModelId(e.target.value)}
                 className="w-full h-14 px-4 rounded-2xl bg-[#121212] border border-white/10 text-white focus:outline-none focus:border-yellow-500 transition-all text-sm"
               >
-                {!apiKey && provider !== 'openrouter' ? (
-                  <option value={modelId}>{modelId} (Enter API Key for more)</option>
-                ) : availableModels.length > 0 ? (
+                {availableModels.length > 0 ? (
                   availableModels.map(m => (
                     <option key={m.id} value={m.id}>{m.name}</option>
                   ))
                 ) : (
-                  <option value={modelId}>{modelId}</option>
+                  <option value={modelId}>
+                    {modelId} {provider !== 'openrouter' && "(Enter API Key for more)"}
+                  </option>
                 )}
               </select>
             </div>

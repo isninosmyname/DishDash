@@ -438,12 +438,9 @@ export default function App() {
     }
   };
 
-  const scrollToSection = (id) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-      setActiveTab(id === 'home' ? 'Home' : id === 'favorites' ? 'Favorites' : 'Recent');
-    }
+  const handleNavigate = (id) => {
+    setActiveTab(id === 'home' ? 'Home' : id === 'favorites' ? 'Favorites' : 'Recent');
+    if (mainContentRef.current) mainContentRef.current.scrollTop = 0;
   };
 
   if (!isOnboarded) {
@@ -478,7 +475,7 @@ export default function App() {
       <Sidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab}
-        onNavigate={scrollToSection}
+        onNavigate={handleNavigate}
         language={language} 
         setLanguage={setLanguage}
         setShowSettings={setShowSettings}
@@ -487,58 +484,67 @@ export default function App() {
       />
 
       <main className="flex-1 overflow-y-auto pb-32 md:pb-0" ref={mainContentRef}>
-        <div id="home">
-          <Hero 
-            ingredients={ingredients} 
-            setIngredients={setIngredients} 
-            onRoll={() => generateRecipe()} 
-            loading={loading}
-            ui={ui}
-          />
+        {activeTab === 'Home' && (
+          <div id="home" className="animate-fade-in">
+            <Hero 
+              ingredients={ingredients} 
+              setIngredients={setIngredients} 
+              onRoll={() => generateRecipe()} 
+              loading={loading}
+              ui={ui}
+            />
 
-          <FilterSection 
-            language={language}
-            setLanguage={setLanguage}
-            mode={mode}
-            setMode={setMode}
-            onImageUpload={handleImageUpload}
-            ui={ui}
-            modelId={modelId}
-          />
+            <FilterSection 
+              language={language}
+              setLanguage={setLanguage}
+              mode={mode}
+              setMode={setMode}
+              onImageUpload={handleImageUpload}
+              ui={ui}
+              modelId={modelId}
+            />
 
-          <FeaturedCards 
-            onRandom={surpriseMe}
-            onDaily={generateDailyRecipe}
-            ui={ui}
-          />
-        </div>
+            <FeaturedCards 
+              onRandom={surpriseMe}
+              onDaily={generateDailyRecipe}
+              ui={ui}
+              loading={loading}
+            />
+          </div>
+        )}
 
-        <div id="favorites">
-          <RecipeList 
-            title={ui.favTitle}
-            subtitle={ui.favSub}
-            items={favorites}
-            onSelect={setRecipe}
-            onDelete={(index) => setFavorites(prev => prev.filter((_, i) => i !== index))}
-            type="favorites"
-          />
-        </div>
+        {activeTab === 'Favorites' && (
+          <div id="favorites" className="animate-fade-in pt-10">
+            <RecipeList 
+              title={ui.favTitle}
+              subtitle={ui.favSub}
+              items={favorites}
+              onSelect={setRecipe}
+              onDelete={(index) => setFavorites(prev => prev.filter((_, i) => i !== index))}
+              type="favorites"
+              emptyMessage={ui.noItems}
+            />
+          </div>
+        )}
 
-        <div id="recent">
-          <RecipeList 
-            title={ui.recentTitle}
-            subtitle={ui.recentSub}
-            items={history}
-            onSelect={setRecipe}
-            onDelete={(index) => setHistory(prev => prev.filter((_, i) => i !== index))}
-            type="history"
-          />
-        </div>
+        {activeTab === 'Recent' && (
+          <div id="recent" className="animate-fade-in pt-10">
+            <RecipeList 
+              title={ui.recentTitle}
+              subtitle={ui.recentSub}
+              items={history}
+              onSelect={setRecipe}
+              onDelete={(index) => setHistory(prev => prev.filter((_, i) => i !== index))}
+              type="history"
+              emptyMessage={ui.noItems}
+            />
+          </div>
+        )}
 
         {recipe && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-fade-in">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setRecipe("")} />
-            <div className="relative w-full max-w-4xl max-h-[90vh] glass rounded-[32px] md:rounded-[40px] overflow-hidden flex flex-col shadow-2xl mx-4 md:mx-0">
+            <div className="relative w-full max-w-4xl max-h-[90vh] bg-[#121212] border border-white/10 rounded-[32px] md:rounded-[40px] overflow-hidden flex flex-col shadow-2xl mx-4 md:mx-0">
               <div className="p-6 md:p-10 border-b border-white/10 flex justify-between items-start">
                 <div className="flex items-center gap-4">
                   <img src="/logo.png" alt="Logo" className="w-12 h-12 rounded-xl shadow-[0_0_15px_rgba(255,215,0,0.2)]" />
@@ -738,14 +744,14 @@ export default function App() {
                     value={modelId}
                     onChange={(e) => setModelId(e.target.value)}
                   >
-                    {!apiKey && provider !== 'openrouter' ? (
-                      <option value={modelId} className="bg-[#121212]">{modelId} (Enter API Key for more)</option>
-                    ) : availableModels.length > 0 ? (
+                    {availableModels.length > 0 ? (
                       availableModels.map(m => (
                         <option key={m.id} value={m.id} className="bg-[#121212]">{m.name}</option>
                       ))
                     ) : (
-                      <option value={modelId} className="bg-[#121212]">{modelId}</option>
+                      <option value={modelId} className="bg-[#121212]">
+                        {modelId} {provider !== 'openrouter' && "(Enter API Key for more)"}
+                      </option>
                     )}
                   </select>
                 </div>

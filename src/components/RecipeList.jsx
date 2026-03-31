@@ -8,7 +8,16 @@ export default function RecipeList({ title, subtitle, items, onSelect, onDelete,
     return titleLine.replace(/[#*]/g, '').trim();
   };
 
-  if (items.length === 0) return null;
+  if (items.length === 0) {
+    return (
+      <div className="px-6 pb-20 animate-fade-in text-center pt-20">
+        <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-6">
+          <Clock size={32} className="text-white/20" />
+        </div>
+        <h2 className="text-xl md:text-2xl font-black text-white/40 uppercase tracking-widest">{emptyMessage || "No Items"}</h2>
+      </div>
+    );
+  }
 
   return (
     <div className="px-6 pb-20 animate-fade-in text-left">
@@ -19,7 +28,7 @@ export default function RecipeList({ title, subtitle, items, onSelect, onDelete,
         </div>
       </div>
 
-      <div className="flex gap-4 md:gap-6 overflow-x-auto pb-6 scrollbar-hide">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pb-6">
         {items.map((item, i) => (
           <div 
             key={i} 

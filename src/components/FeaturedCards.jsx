@@ -1,6 +1,6 @@
 import { Sparkles, Soup, ArrowRight } from 'lucide-react';
 
-export default function FeaturedCards({ onRandom, onDaily, ui }) {
+export default function FeaturedCards({ onRandom, onDaily, ui, loading }) {
   const cards = [
     {
       type: ui.featuredRandom.type,
@@ -29,7 +29,7 @@ export default function FeaturedCards({ onRandom, onDaily, ui }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-6 mb-20">
       {cards.map((card) => (
-        <div key={card.title} className={`${card.bgColor} rounded-[32px] md:rounded-[40px] overflow-hidden relative group h-[400px] md:h-[480px] cursor-pointer`} onClick={card.onClick}>
+        <div key={card.title} className={`${card.bgColor} rounded-[32px] md:rounded-[40px] overflow-hidden relative group h-[400px] md:h-[480px] ${loading ? 'opacity-80 cursor-wait pointer-events-none' : 'cursor-pointer'}`} onClick={loading ? undefined : card.onClick}>
           <img src={card.image} alt={card.title} className="absolute inset-x-0 bottom-0 w-full h-[280px] md:h-[320px] object-cover mix-blend-overlay opacity-60 group-hover:scale-105 transition-transform duration-700" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
           
@@ -44,9 +44,9 @@ export default function FeaturedCards({ onRandom, onDaily, ui }) {
             <p className="text-white/60 text-sm md:text-lg max-w-[320px] mb-auto font-medium leading-snug">
               {card.description}
             </p>
-            <button className={`${card.btnColor} px-6 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest flex items-center gap-3 group-hover:gap-5 transition-all duration-300`}>
-              {card.btnText}
-              <ArrowRight size={18} />
+            <button disabled={loading} className={`${card.btnColor} px-6 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest flex items-center gap-3 group-hover:gap-5 transition-all duration-300`}>
+              {loading ? ui.loading : card.btnText}
+              {!loading && <ArrowRight size={18} />}
             </button>
           </div>
         </div>
