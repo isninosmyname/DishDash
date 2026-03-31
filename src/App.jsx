@@ -75,7 +75,8 @@ const uiTranslations = {
     allergies: "Allergies",
     allergiesHint: "Peanuts, Gluten, Dairy...",
     mealType: "Meal Type",
-    mealTypes: { none: "Any", breakfast: "Breakfast", lunch: "Lunch", dinner: "Dinner" }
+    mealTypes: { none: "Any", breakfast: "Breakfast", lunch: "Lunch", dinner: "Dinner" },
+    downloadAPK: "Download APK"
   },
   Español: { 
     language: "Idioma", 
@@ -131,7 +132,8 @@ const uiTranslations = {
     allergies: "Alergias",
     allergiesHint: "Maníes, Gluten, Lácteos...",
     mealType: "Tipo de Comida",
-    mealTypes: { none: "Cualquiera", breakfast: "Desayuno", lunch: "Almuerzo", dinner: "Cena" }
+    mealTypes: { none: "Cualquiera", breakfast: "Desayuno", lunch: "Almuerzo", dinner: "Cena" },
+    downloadAPK: "Descargar APK"
   }
 };
 

@@ -9,6 +9,7 @@ export default defineConfig({
     tailwindcss(),
     react(),
   ],
+  assetsInclude: ['**/*.apk'],
   server: {
   host: true,
   port: 3000,
