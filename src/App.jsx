@@ -73,7 +73,9 @@ const uiTranslations = {
     setupHint: "Please enter your API Key to start cooking!",
     startCooking: "Start Cooking",
     allergies: "Allergies",
-    allergiesHint: "Peanuts, Gluten, Dairy..."
+    allergiesHint: "Peanuts, Gluten, Dairy...",
+    mealType: "Meal Type",
+    mealTypes: { none: "Any", breakfast: "Breakfast", lunch: "Lunch", dinner: "Dinner" }
   },
   Español: { 
     language: "Idioma", 
@@ -127,7 +129,9 @@ const uiTranslations = {
     setupHint: "¡Por favor ingrese su clave API para comenzar a cocinar!",
     startCooking: "Empezar a Cocinar",
     allergies: "Alergias",
-    allergiesHint: "Maníes, Gluten, Lácteos..."
+    allergiesHint: "Maníes, Gluten, Lácteos...",
+    mealType: "Tipo de Comida",
+    mealTypes: { none: "Cualquiera", breakfast: "Desayuno", lunch: "Almuerzo", dinner: "Cena" }
   }
 };
 
@@ -146,6 +150,7 @@ export default function App() {
   const [healthData, setHealthData] = useState(null);
   const [analyzingHealth, setAnalyzingHealth] = useState(false);
   const [mode, setMode] = useState("Quick");
+  const [mealType, setMealType] = useState("None");
   const [theme, setTheme] = useState(localStorage.getItem('dishdash_theme') || "dark");
   const [listening, setListening] = useState(false);
   const [utterance, setUtterance] = useState(null);
@@ -294,7 +299,7 @@ export default function App() {
     setLoading(true);
     setHealthData(null);
     try {
-      const prompt = `ROLE: Michelin-star Chef. \nINGREDIENTS: ${finalIngredients} \nPANTRY (Always Available): ${pantry || 'None'} \nMODE: ${mode} \nLANGUAGE: ${language} \nCONTEXT: ${ui.secret} \nALLERGIES: ${allergies || 'None'} \nFormat: # [Title] \nTime: [X] mins \nDifficulty: [E/M/H] \n## Steps \n1...`;
+      const prompt = `ROLE: Michelin-star Chef. \nINGREDIENTS: ${finalIngredients} \nPANTRY (Always Available): ${pantry || 'None'} \nMEAL TYPE: ${mealType !== 'None' ? mealType : 'Any'} \nMODE: ${mode} \nLANGUAGE: ${language} \nCONTEXT: ${ui.secret} \nALLERGIES: ${allergies || 'None'} \nFormat: # [Title] \nTime: [X] mins \nDifficulty: [E/M/H] \n## Steps \n1...`;
       const text = await callAI(prompt);
       setRecipe(text);
       setHistory(prev => [text, ...prev].slice(0, 10));
@@ -570,6 +575,8 @@ export default function App() {
               setLanguage={setLanguage}
               mode={mode}
               setMode={setMode}
+              mealType={mealType}
+              setMealType={setMealType}
               onImageUpload={handleImageUpload}
               ui={ui}
               modelId={modelId}

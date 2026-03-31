@@ -1,10 +1,12 @@
-import { ChevronDown, Globe, Zap, Camera } from 'lucide-react';
+import { ChevronDown, Globe, Zap, Camera, Utensils } from 'lucide-react';
 
 export default function FilterSection({ 
   language, 
   setLanguage, 
   mode, 
   setMode, 
+  mealType,
+  setMealType,
   onImageUpload,
   ui,
   modelId
@@ -32,31 +34,43 @@ export default function FilterSection({
         { label: ui.modes.budget, value: 'Budget' }
       ],
       onChange: (e) => setMode(e.target.value)
+    },
+    { 
+      label: ui.mealType.toUpperCase(), 
+      value: mealType, 
+      icon: <Utensils size={18} className="text-orange-500" />, 
+      options: [
+        { label: ui.mealTypes.none, value: 'None' },
+        { label: ui.mealTypes.breakfast, value: 'Breakfast' },
+        { label: ui.mealTypes.lunch, value: 'Lunch' },
+        { label: ui.mealTypes.dinner, value: 'Dinner' }
+      ],
+      onChange: (e) => setMealType(e.target.value)
     }
   ];
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 px-6 mb-16">
       {filters.map((filter) => (
-        <div key={filter.label} className="bg-white/5 border border-white/5 rounded-2xl p-4 md:p-6 relative group transition-all duration-300 hover:bg-white/10">
+        <div key={filter.label} className="bg-white/5 border border-white/5 rounded-2xl p-4 md:p-6 transition-all duration-300 hover:bg-white/10">
           <label htmlFor={`filter-${filter.label}`} className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2 md:mb-3">
             {filter.label}
           </label>
-          <div className="flex items-center justify-between w-full">
+          <div className="relative flex items-center w-full">
             <div className="flex items-center gap-2 md:gap-3 w-full">
-              {filter.icon}
+              <div className="shrink-0">{filter.icon}</div>
               <select 
                 id={`filter-${filter.label}`}
                 value={filter.value} 
                 onChange={filter.onChange}
-                className="bg-transparent text-white text-[12px] md:text-sm font-bold appearance-none focus:outline-none cursor-pointer w-full pr-6"
+                className="bg-transparent text-white text-[12px] md:text-sm font-bold appearance-none focus:outline-none focus:ring-0 cursor-pointer w-full pr-6"
               >
                 {filter.options.map(opt => (
                   <option key={opt.value} value={opt.value} className="bg-[#121212]">{opt.label}</option>
                 ))}
               </select>
             </div>
-            <ChevronDown size={14} className="text-[#FFD700] absolute right-4 md:right-6 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <ChevronDown size={14} className="text-[#FFD700] absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none shrink-0" />
           </div>
         </div>
       ))}

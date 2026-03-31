@@ -86,10 +86,10 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
   };
 
   const handleSkip = () => {
-    if (step === 1) {
-      setStep(2);
-    } else if (step === 2) {
-      onComplete({ apiKey: "", provider, modelId: "", source: "" });
+    if (step < 3) {
+      setStep(step + 1);
+    } else {
+      onComplete({ apiKey: "", provider, modelId: "", source: "", username: "", allergies: localAllergies });
     }
   };
 
@@ -283,12 +283,12 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
           </button>
         </div>
 
-        {step > 0 && step < 3 && (
+        {step > 0 && (
           <button
             onClick={handleSkip}
             className="w-full mt-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-white/60 transition-all py-2"
           >
-            {language === 'Español' ? 'Pasar Paso' : 'Skip Step'}
+            {language === 'Español' ? 'Saltar Paso' : 'Skip Step'}
           </button>
         )}
       </div>
