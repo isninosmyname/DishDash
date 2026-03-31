@@ -383,7 +383,7 @@ export default function App() {
     }
     setLoading(true);
     try {
-      const prompt = `Daily special recipe idea (${mode}). Language: ${language}`;
+      const prompt = `Daily special recipe idea (${mode} mode). Language: ${language} (ONLY RETURN 1 RECIPE AND THE STEPS NO SUGGESTIONS (unlesss its the chef's secret))`;
       const text = await callAI(prompt);
       const data = { date: today, recipe: text };
       setDailyRecipe(data);
