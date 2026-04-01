@@ -20,7 +20,7 @@ export default function CookingMode({ steps, onExit, language, ui }) {
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
+    if (SpeechRecognition && !recognition) {
       const recog = new SpeechRecognition();
       recog.continuous = true;
       recog.interimResults = false;
@@ -38,13 +38,29 @@ export default function CookingMode({ steps, onExit, language, ui }) {
         }
       };
 
-      recog.onend = () => {
-        if (isListening) recog.start();
-      };
-
       setRecognition(recog);
     }
-  }, [language, nextStep, prevStep, onExit, isListening]);
+
+    return () => {
+      if (recognition) {
+        recognition.stop();
+      }
+    };
+  }, [language, nextStep, prevStep, onExit, recognition]);
+
+  useEffect(() => {
+    if (recognition) {
+      recognition.onend = () => {
+        if (isListening) {
+          try {
+            recognition.start();
+          } catch (e) {
+            console.error("Failed to restart recognition", e);
+          }
+        }
+      };
+    }
+  }, [isListening, recognition]);
 
   const toggleListening = () => {
     if (isListening) {
@@ -66,9 +82,9 @@ export default function CookingMode({ steps, onExit, language, ui }) {
             <Play size={24} fill="currentColor" />
           </div>
           <div>
-            <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter italic text-yellow-500">Cooking Mode</h2>
+            <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter italic text-yellow-500">{ui.cooking.title}</h2>
             <p className="text-white/40 text-[10px] md:text-sm font-medium uppercase tracking-widest">
-              Step {currentIndex + 1} of {steps.length}
+              {ui.cooking.step} {currentIndex + 1} {ui.cooking.of} {steps.length}
             </p>
           </div>
         </div>
@@ -91,7 +107,7 @@ export default function CookingMode({ steps, onExit, language, ui }) {
         <div className="max-w-4xl space-y-6 md:space-y-8 animate-slide-up">
           <div className="flex justify-center mb-2 md:mb-4">
             <span className="px-3 md:px-4 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-[10px] font-black uppercase tracking-widest">
-              Instruction
+              {ui.cooking.instruction}
             </span>
           </div>
           <h1 className="text-4xl md:text-6xl font-black leading-[1.1] tracking-tight selection:bg-yellow-500/30 px-2">
@@ -105,17 +121,18 @@ export default function CookingMode({ steps, onExit, language, ui }) {
               {isListening ? <Mic size={24} /> : <MicOff size={24} />}
             </div>
             <span className={`text-[10px] font-black uppercase tracking-widest ${isListening ? 'text-yellow-500' : ''}`}>
-              {isListening ? (language === 'Español' ? 'Escuchando...' : 'Listening...') : (language === 'Español' ? 'Voz Desactivada' : 'Voice Off')}
+              {isListening ? ui.cooking.listening : ui.cooking.voiceOff}
             </span>
           </div>
         </div>
 
         <div className="absolute bottom-32 left-1/2 -translate-x-1/2 flex gap-4 text-[9px] font-bold uppercase tracking-[0.2em] text-white/10 whitespace-nowrap">
-          <span>"Next"</span>
-          <span>•</span>
-          <span>"Back"</span>
-          <span>•</span>
-          <span>"Stop"</span>
+          {ui.cooking.commands.map((cmd, idx) => (
+            <div key={cmd} className="flex items-center gap-4">
+              <span>"{cmd}"</span>
+              {idx < ui.cooking.commands.length - 1 && <span>•</span>}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -126,7 +143,7 @@ export default function CookingMode({ steps, onExit, language, ui }) {
           className="flex items-center gap-4 px-6 md:px-10 py-4 md:py-6 rounded-[24px] md:rounded-[32px] bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all group"
         >
           <ChevronLeft className="group-hover:-translate-x-1 transition-transform" />
-          <span className="hidden md:inline">Previous</span>
+          <span className="hidden md:inline">{ui.cooking.previous}</span>
         </button>
 
         <div className="flex gap-2">
@@ -142,7 +159,7 @@ export default function CookingMode({ steps, onExit, language, ui }) {
           onClick={currentIndex === steps.length - 1 ? onExit : nextStep}
           className="flex items-center gap-4 px-6 md:px-10 py-4 md:py-6 rounded-[24px] md:rounded-[32px] bg-yellow-500 text-black font-black uppercase tracking-widest hover:bg-yellow-400 transition-all group"
         >
-          <span className="hidden md:inline">{currentIndex === steps.length - 1 ? 'Finish' : 'Next Step'}</span>
+          <span className="hidden md:inline">{currentIndex === steps.length - 1 ? ui.cooking.finish : ui.cooking.next}</span>
           {currentIndex === steps.length - 1 ? <RotateCcw size={20} /> : <ChevronRight className="group-hover:translate-x-1 transition-transform" />}
         </button>
       </div>

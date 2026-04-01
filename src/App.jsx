@@ -76,7 +76,19 @@ const uiTranslations = {
     allergiesHint: "Peanuts, Gluten, Dairy...",
     mealType: "Meal Type",
     mealTypes: { none: "Any", breakfast: "Breakfast", lunch: "Lunch", dinner: "Dinner" },
-    downloadAPK: "Download APK"
+    downloadAPK: "Download APK",
+    cooking: {
+      title: "Cooking Mode",
+      step: "Step",
+      of: "of",
+      instruction: "Instruction",
+      previous: "Previous",
+      next: "Next Step",
+      finish: "Finish",
+      listening: "Listening...",
+      voiceOff: "Voice Off",
+      commands: ["Next", "Back", "Stop"]
+    }
   },
   Español: { 
     language: "Idioma", 
@@ -133,7 +145,19 @@ const uiTranslations = {
     allergiesHint: "Maníes, Gluten, Lácteos...",
     mealType: "Tipo de Comida",
     mealTypes: { none: "Cualquiera", breakfast: "Desayuno", lunch: "Almuerzo", dinner: "Cena" },
-    downloadAPK: "Descargar APK"
+    downloadAPK: "Descargar APK",
+    cooking: {
+      title: "Modo Cocinar",
+      step: "Paso",
+      of: "de",
+      instruction: "Instrucción",
+      previous: "Anterior",
+      next: "Siguiente",
+      finish: "Finalizar",
+      listening: "Escuchando...",
+      voiceOff: "Voz Desactivada",
+      commands: ["Siguiente", "Atrás", "Parar"]
+    }
   }
 };
 
