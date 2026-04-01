@@ -194,8 +194,9 @@ const MacroDonut = ({ macros, ui }) => {
   const cPerc = (carbs / total) * 100;
   const fPerc = (fats / total) * 100;
 
-  const size = 160;
-  const strokeWidth = 14;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const size = isMobile ? 120 : 160;
+  const strokeWidth = isMobile ? 10 : 14;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
 
@@ -204,35 +205,31 @@ const MacroDonut = ({ macros, ui }) => {
   const fOffset = circumference - ((pPerc + cPerc + fPerc) / 100) * circumference;
 
   return (
-    <div className="flex flex-col items-center gap-6">
-      <div className="relative w-40 h-40">
+    <div className="flex flex-col items-center gap-4 md:gap-6">
+      <div className="relative" style={{ width: size, height: size }}>
         <svg WebkitTransform="rotate(-90deg)" transform="rotate(-90deg)" width={size} height={size}>
-          {/* Background */}
           <circle cx={size/2} cy={size/2} r={radius} stroke="rgba(255,255,255,0.05)" strokeWidth={strokeWidth} fill="none" />
-          {/* Fats */}
           <circle cx={size/2} cy={size/2} r={radius} stroke="#EF4444" strokeWidth={strokeWidth} fill="none" strokeDasharray={circumference} strokeDashoffset={fOffset} strokeLinecap="round" className="transition-all duration-1000 ease-out" />
-          {/* Carbs */}
           <circle cx={size/2} cy={size/2} r={radius} stroke="#F59E0B" strokeWidth={strokeWidth} fill="none" strokeDasharray={circumference} strokeDashoffset={cOffset} strokeLinecap="round" className="transition-all duration-1000 ease-out" />
-          {/* Protein */}
           <circle cx={size/2} cy={size/2} r={radius} stroke="#0EA5E9" strokeWidth={strokeWidth} fill="none" strokeDasharray={circumference} strokeDashoffset={pOffset} strokeLinecap="round" className="transition-all duration-1000 ease-out" />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-          <span className="text-2xl font-black text-white leading-none">{calories}</span>
-          <span className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-1">{ui.calories}</span>
+          <span className="text-xl md:text-2xl font-black text-white leading-none">{calories}</span>
+          <span className="text-[8px] md:text-[10px] font-black text-white/40 uppercase tracking-widest mt-1">{ui.calories}</span>
         </div>
       </div>
-      <div className="flex gap-4">
+      <div className="flex flex-wrap justify-center gap-3 md:gap-4 px-4">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-[#0EA5E9]" />
-          <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">{protein}g {ui.protein}</span>
+          <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#0EA5E9]" />
+          <span className="text-[8px] md:text-[10px] font-black text-white/60 uppercase tracking-widest">{protein}g {ui.protein}</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-[#F59E0B]" />
-          <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">{carbs}g {ui.carbs}</span>
+          <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#F59E0B]" />
+          <span className="text-[8px] md:text-[10px] font-black text-white/60 uppercase tracking-widest">{carbs}g {ui.carbs}</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-[#EF4444]" />
-          <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">{fats}g {ui.fats}</span>
+          <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full bg-[#EF4444]" />
+          <span className="text-[8px] md:text-[10px] font-black text-white/60 uppercase tracking-widest">{fats}g {ui.fats}</span>
         </div>
       </div>
     </div>
@@ -415,11 +412,9 @@ export default function App() {
       const checkPrompt = `LIST: ${finalIngredients}. Identify any items that are NOT edible or typically found in food. Respond with ONLY the non-edible items separated by commas, or "OK" if everything is edible or could be food. Be very strict (e.g. Paper, Metal, Plastic are non-edible). Language: ${language}`;
       const recipePrompt = `ROLE: Michelin-star Chef. \nINGREDIENTS: ${finalIngredients} \nPANTRY (Always Available): ${pantry || 'None'} \nMEAL TYPE: ${mealType !== 'None' ? mealType : 'Any'} \nMODE: ${mode} \nLANGUAGE: ${language} \nCONTEXT: ${ui.secret} \nALLERGIES: ${allergies || 'None'} \nFormat: # [Title] \nTime: [X] mins \nDifficulty: [E/M/H] \n## Steps \n1...`;
 
-      // Parallel calls start here
       const checkPromise = skipCheck || inputStr ? Promise.resolve("OK") : callAI(checkPrompt);
       const recipePromise = callAI(recipePrompt);
 
-      // Await check first for faster interception
       const checkResult = await checkPromise;
 
       if (checkResult && checkResult.trim().toUpperCase() !== "OK") {
@@ -429,7 +424,6 @@ export default function App() {
         return;
       }
 
-      // If check is OK, await the recipe
       const recipeText = await recipePromise;
 
       setRecipe(recipeText);
@@ -835,9 +829,9 @@ Return ONLY this text.`;
         )}
 
         {recipe && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-fade-in">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-6 animate-fade-in">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setRecipe("")} />
-            <div className="relative w-full max-w-4xl max-h-[90vh] bg-[#121212] border border-white/10 rounded-[32px] md:rounded-[40px] overflow-hidden flex flex-col shadow-2xl mx-4 md:mx-0">
+            <div className="relative w-full h-full md:h-auto md:max-w-4xl md:max-h-[90vh] bg-[#121212] md:border border-white/10 md:rounded-[40px] overflow-hidden flex flex-col shadow-2xl">
               <div className="p-6 md:p-10 border-b border-white/10 flex justify-between items-start">
                 <div className="flex items-center gap-4">
                   <img src="/logo.png" alt="Logo" className="w-12 h-12 rounded-xl shadow-[0_0_15px_rgba(255,215,0,0.2)]" />
@@ -867,7 +861,7 @@ Return ONLY this text.`;
                     }`}
                   >
                     <Heart size={14} className="md:w-4 md:h-4" fill={favorites.includes(recipe) ? "currentColor" : "none"} />
-                    <span className="hidden xs:inline">{favorites.includes(recipe) ? ui.remFav : ui.addFav}</span>
+                    <span className="hidden sm:inline">{favorites.includes(recipe) ? ui.remFav : ui.addFav}</span>
                   </button>
                   
                   <button
@@ -875,7 +869,7 @@ Return ONLY this text.`;
                     className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-white/10"
                   >
                     <Copy size={14} className="md:w-4 md:h-4" />
-                    <span className="hidden xs:inline">{copyStatus ? ui.copied : ui.copy}</span>
+                    <span className="hidden sm:inline">{copyStatus ? ui.copied : ui.copy}</span>
                   </button>
 
                   <button
@@ -884,7 +878,7 @@ Return ONLY this text.`;
                     className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-green-500/20 border border-green-500/20 text-green-500 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-green-500/30"
                   >
                     <Activity size={14} className="md:w-4 md:h-4" />
-                    <span className="hidden xs:inline">{analyzingHealth ? ui.analyzing : ui.health}</span>
+                    <span className="hidden sm:inline">{analyzingHealth ? ui.analyzing : ui.health}</span>
                   </button>
 
                   <button
@@ -892,7 +886,7 @@ Return ONLY this text.`;
                     className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-purple-500/20 border border-purple-500/20 text-purple-400 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-purple-500/30"
                   >
                     {listening ? <Square size={14} className="md:w-4 md:h-4" /> : <Volume2 size={14} className="md:w-4 md:h-4" />}
-                    <span className="hidden xs:inline">{listening ? ui.stop : ui.listen}</span>
+                    <span className="hidden sm:inline">{listening ? ui.stop : ui.listen}</span>
                   </button>
 
                   <button
@@ -901,7 +895,7 @@ Return ONLY this text.`;
                     className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-yellow-500/20 border border-yellow-500/20 text-yellow-500 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-yellow-500/30"
                   >
                     <ShoppingCart size={14} className="md:w-4 md:h-4" />
-                    <span className="hidden xs:inline">{generatingList ? ui.generating : ui.shoppingList}</span>
+                    <span className="hidden sm:inline">{generatingList ? ui.generating : ui.shoppingList}</span>
                   </button>
 
                   <button
@@ -910,7 +904,7 @@ Return ONLY this text.`;
                     className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-orange-500/20 border border-orange-500/20 text-orange-400 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-orange-500/30"
                   >
                     <Replace size={14} className="md:w-4 md:h-4" />
-                    <span className="hidden xs:inline">{generatingSubstitutions ? ui.submitting : ui.substitute}</span>
+                    <span className="hidden sm:inline">{generatingSubstitutions ? ui.submitting : ui.substitute}</span>
                   </button>
 
                   <button
@@ -918,7 +912,7 @@ Return ONLY this text.`;
                     className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-yellow-500 text-black font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-yellow-400"
                   >
                     <ChefHat size={14} className="md:w-4 md:h-4" />
-                    <span className="hidden xs:inline">{ui.startCooking}</span>
+                    <span className="hidden sm:inline">{ui.startCooking}</span>
                   </button>
                 </div>
 

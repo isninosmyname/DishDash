@@ -110,7 +110,7 @@ export default function CookingMode({ steps, onExit, language, ui }) {
               {ui.cooking.instruction}
             </span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-black leading-[1.1] tracking-tight selection:bg-yellow-500/30 px-2">
+          <h1 className="text-2xl md:text-6xl font-black md:leading-[1.1] tracking-tight selection:bg-yellow-500/30 px-2 lg:px-0">
             {steps[currentIndex]}
           </h1>
         </div>
@@ -140,10 +140,10 @@ export default function CookingMode({ steps, onExit, language, ui }) {
         <button 
           onClick={prevStep}
           disabled={currentIndex === 0}
-          className="flex items-center gap-4 px-6 md:px-10 py-4 md:py-6 rounded-[24px] md:rounded-[32px] bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all group"
+          className="flex items-center gap-2 md:gap-4 px-4 md:px-10 py-3 md:py-6 rounded-2xl md:rounded-[32px] bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest hover:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed transition-all group"
         >
-          <ChevronLeft className="group-hover:-translate-x-1 transition-transform" />
-          <span className="hidden md:inline">{ui.cooking.previous}</span>
+          <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+          <span className="hidden sm:inline text-[10px] md:text-sm">{ui.cooking.previous}</span>
         </button>
 
         <div className="flex gap-2">
@@ -157,10 +157,10 @@ export default function CookingMode({ steps, onExit, language, ui }) {
 
         <button 
           onClick={currentIndex === steps.length - 1 ? onExit : nextStep}
-          className="flex items-center gap-4 px-6 md:px-10 py-4 md:py-6 rounded-[24px] md:rounded-[32px] bg-yellow-500 text-black font-black uppercase tracking-widest hover:bg-yellow-400 transition-all group"
+          className="flex items-center gap-2 md:gap-4 px-4 md:px-10 py-3 md:py-6 rounded-2xl md:rounded-[32px] bg-yellow-500 text-black font-black uppercase tracking-widest hover:bg-yellow-400 transition-all group"
         >
-          <span className="hidden md:inline">{currentIndex === steps.length - 1 ? ui.cooking.finish : ui.cooking.next}</span>
-          {currentIndex === steps.length - 1 ? <RotateCcw size={20} /> : <ChevronRight className="group-hover:translate-x-1 transition-transform" />}
+          <span className="hidden sm:inline text-[10px] md:text-sm">{currentIndex === steps.length - 1 ? ui.cooking.finish : ui.cooking.next}</span>
+          {currentIndex === steps.length - 1 ? <RotateCcw size={18} /> : <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />}
         </button>
       </div>
     </div>

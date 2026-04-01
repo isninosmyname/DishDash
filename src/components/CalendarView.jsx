@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Calendar, X, Sparkles, ChefHat, Heart } from 'lucide-react';
 
 const DAYS = {
@@ -6,6 +7,7 @@ const DAYS = {
 };
 
 export default function CalendarView({ mealPlan, setMealPlan, favorites, setRecipe, language, ui, onGenerateWeek }) {
+  const [activeFavIndex, setActiveFavIndex] = useState(null);
   const days = DAYS[language] || DAYS.English;
 
   const removeFromPlan = (day, index) => {
@@ -96,15 +98,19 @@ export default function CalendarView({ mealPlan, setMealPlan, favorites, setReci
             <p className="text-white/20 text-sm italic col-span-full">{ui.noItems}</p>
           ) : (
             favorites.map((fav, i) => (
-              <div key={i} className="group relative space-y-3">
+              <div 
+                key={i} 
+                className="group relative space-y-3 cursor-pointer"
+                onClick={() => setActiveFavIndex(activeFavIndex === i ? null : i)}
+              >
                 <div className="aspect-square rounded-2xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center p-4">
                   <ChefHat size={32} className="text-white/10 group-hover:text-yellow-500/20 transition-colors" />
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-center gap-1 p-2">
+                  <div className={`absolute inset-0 bg-black/80 transition-all flex flex-col justify-center gap-1 p-2 ${activeFavIndex === i ? 'opacity-100' : 'opacity-0 md:group-hover:opacity-100 pointer-events-none md:pointer-events-auto'}`}>
                     {days.map(day => (
                       <button 
                         key={day}
-                        onClick={() => addToPlan(day, fav)}
-                        className="w-full py-1 rounded-md bg-yellow-500 text-black text-[8px] font-black uppercase tracking-widest hover:bg-yellow-400"
+                        onClick={(e) => { e.stopPropagation(); addToPlan(day, fav); setActiveFavIndex(null); }}
+                        className="w-full py-1.5 rounded-md bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest hover:bg-yellow-400 active:scale-95 transition-all"
                       >
                         {day.slice(0, 3)}
                       </button>

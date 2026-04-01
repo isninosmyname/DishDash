@@ -25,12 +25,12 @@ export default function Hero({ ingredients, setIngredients, onRoll, loading, ui 
           value={ingredients}
           onChange={(e) => setIngredients(e.target.value)}
           placeholder={ui.placeholder}
-          className="w-full h-14 md:h-24 pl-12 md:pl-16 pr-28 md:pr-44 rounded-xl md:rounded-3xl bg-white/10 border border-white/5 text-sm md:text-xl placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:bg-white/15 transition-all duration-300 backdrop-blur-md"
+          className="w-full h-14 md:h-24 pl-10 md:pl-16 pr-24 md:pr-44 rounded-xl md:rounded-3xl bg-white/10 border border-white/5 text-xs md:text-xl placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:bg-white/15 transition-all duration-300 backdrop-blur-md"
         />
         <button
           onClick={onRoll}
           disabled={loading}
-          className="absolute right-2 top-2 bottom-2 px-4 md:px-10 rounded-lg md:rounded-2xl bg-gradient-to-tr from-[#DEB3C4] via-[#DEB3C4] to-[#FCE38A] text-black font-black uppercase tracking-widest text-[9px] md:text-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group flex items-center gap-2 md:gap-3"
+          className="absolute right-1.5 top-1.5 bottom-1.5 px-3 md:px-10 rounded-lg md:rounded-2xl bg-gradient-to-tr from-[#DEB3C4] via-[#DEB3C4] to-[#FCE38A] text-black font-black uppercase tracking-widest text-[8px] md:text-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group flex items-center gap-2 md:gap-3"
         >
           {loading ? ui.loading : ui.button}
           <div className="hidden md:flex w-5 h-5 bg-black/10 rounded items-center justify-center">
