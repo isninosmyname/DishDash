@@ -561,7 +561,7 @@ export default function App() {
         user={user}
       />
 
-      <main className="flex-1 overflow-y-auto pb-32 md:pb-0" ref={mainContentRef}>
+      <main className="flex-1 overflow-y-auto pb-28 md:pb-0" ref={mainContentRef}>
         {activeTab === 'Home' && (
           <div id="home" className="animate-fade-in">
             <Hero 
@@ -721,6 +721,15 @@ export default function App() {
                   </button>
                 </div>
 
+                {analyzingHealth && !healthData && (
+                  <div className="p-6 md:p-8 rounded-[24px] md:rounded-[32px] bg-white/5 border border-white/10 animate-pulse flex flex-col items-center justify-center space-y-4">
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl bg-green-500/10 flex items-center justify-center border border-green-500/20">
+                      <Activity size={32} className="text-green-500" />
+                    </div>
+                    <p className="text-white/40 text-[10px] md:text-xs font-black uppercase tracking-widest">{ui.analyzing}</p>
+                  </div>
+                )}
+
                 {healthData && (
                   <div className="p-6 md:p-8 rounded-[24px] md:rounded-[32px] bg-white/5 border border-white/10 animate-fade-in">
                     <div className="flex items-center gap-4 md:gap-6 mb-4 md:mb-6">
@@ -741,6 +750,15 @@ export default function App() {
                     <div className="prose prose-invert prose-xs md:prose-sm max-w-none text-white/60">
                       <Markdown>{healthData.bullets}</Markdown>
                     </div>
+                  </div>
+                )}
+
+                {generatingList && !shoppingList && (
+                  <div className="p-6 md:p-8 rounded-[24px] md:rounded-[32px] bg-white/5 border border-white/10 animate-pulse flex flex-col items-center justify-center space-y-4">
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl bg-yellow-500/10 flex items-center justify-center border border-yellow-500/20">
+                      <ShoppingCart size={32} className="text-yellow-500" />
+                    </div>
+                    <p className="text-white/40 text-[10px] md:text-xs font-black uppercase tracking-widest">{ui.generating}</p>
                   </div>
                 )}
 

@@ -80,7 +80,7 @@ export default function CookingMode({ steps, onExit, language, ui }) {
         </button>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-20 text-center relative">
+      <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-20 text-center relative overflow-y-auto">
         <div className="absolute top-0 left-0 w-full h-1 bg-white/5">
           <div 
             className="h-full bg-yellow-500 transition-all duration-500" 

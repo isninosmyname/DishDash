@@ -6,7 +6,7 @@ export default function Hero({ ingredients, setIngredients, onRoll, loading, ui 
     <div className="relative pt-6 md:pt-12 pb-16 px-6">
 
       <div className="space-y-4 mb-8 md:mb-16">
-        <h1 className="text-3xl md:text-[72px] font-black leading-[1] md:leading-[0.9] text-white tracking-tighter">
+        <h1 className="text-5xl md:text-[72px] font-black leading-[1.1] md:leading-[0.9] text-white tracking-tighter">
           {ui.heroTitle}
           <span className="block text-[#FFD700]">{ui.heroKitchen}</span>
         </h1>
