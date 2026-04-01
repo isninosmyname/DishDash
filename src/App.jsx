@@ -10,7 +10,7 @@ import Toast from './components/Toast';
 import CookingMode from './components/CookingMode';
 import PantryView from './components/PantryView';
 import CalendarView from './components/CalendarView';
-import { X, Copy, Heart, Activity, Volume2, Square, ShoppingCart, CheckCircle2, Circle, Share, Flame, ChefHat } from 'lucide-react';
+import { X, Copy, Heart, Activity, Volume2, Square, ShoppingCart, CheckCircle2, Circle, Share, Flame, ChefHat, Replace } from 'lucide-react';
 
 const ingredientPools = { 
   base: ["chicken", "eggs", "rice", "pasta", "potato", "beans"], 
@@ -88,7 +88,20 @@ const uiTranslations = {
       listening: "Listening...",
       voiceOff: "Voice Off",
       commands: ["Next", "Back", "Stop"]
-    }
+    },
+    substitute: "Substitutes",
+    submitting: "Searching...",
+    subTitle: "Ingredient Substitutions",
+    edibleWarning: "Warning: Non-Edible Items Detected!",
+    edibleDetecting: "Checking ingredients...",
+    edibleDesc: "We detected items that might not be edible: ",
+    edibleProceed: "Are you sure you want to proceed?",
+    edibleConfirm: "Continue Anyway",
+    edibleCancel: "Edit Ingredients",
+    protein: "Protein",
+    carbs: "Carbs",
+    fats: "Fats",
+    calories: "Calories",
   },
   Español: { 
     language: "Idioma", 
@@ -157,8 +170,73 @@ const uiTranslations = {
       listening: "Escuchando...",
       voiceOff: "Voz Desactivada",
       commands: ["Siguiente", "Atrás", "Parar"]
-    }
+    },
+    substitute: "Sustitutos",
+    submitting: "Buscando...",
+    subTitle: "Sustitutos de Ingredientes",
+    edibleWarning: "¡Atención: Elementos no comestibles!",
+    edibleDetecting: "Verificando...",
+    edibleDesc: "Detectamos elementos que podrían no ser comestibles: ",
+    edibleProceed: "¿Seguro que quieres continuar?",
+    edibleConfirm: "Continuar de todos modos",
+    edibleCancel: "Editar Ingredientes",
+    protein: "Proteína",
+    carbs: "Carbs",
+    fats: "Grasas",
+    calories: "Calorías",
   }
+};
+
+const MacroDonut = ({ macros, ui }) => {
+  const { protein, carbs, fats, calories } = macros;
+  const total = protein + carbs + fats || 1;
+  const pPerc = (protein / total) * 100;
+  const cPerc = (carbs / total) * 100;
+  const fPerc = (fats / total) * 100;
+
+  const size = 160;
+  const strokeWidth = 14;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+
+  const pOffset = circumference - (pPerc / 100) * circumference;
+  const cOffset = circumference - ((pPerc + cPerc) / 100) * circumference;
+  const fOffset = circumference - ((pPerc + cPerc + fPerc) / 100) * circumference;
+
+  return (
+    <div className="flex flex-col items-center gap-6">
+      <div className="relative w-40 h-40">
+        <svg WebkitTransform="rotate(-90deg)" transform="rotate(-90deg)" width={size} height={size}>
+          {/* Background */}
+          <circle cx={size/2} cy={size/2} r={radius} stroke="rgba(255,255,255,0.05)" strokeWidth={strokeWidth} fill="none" />
+          {/* Fats */}
+          <circle cx={size/2} cy={size/2} r={radius} stroke="#EF4444" strokeWidth={strokeWidth} fill="none" strokeDasharray={circumference} strokeDashoffset={fOffset} strokeLinecap="round" className="transition-all duration-1000 ease-out" />
+          {/* Carbs */}
+          <circle cx={size/2} cy={size/2} r={radius} stroke="#F59E0B" strokeWidth={strokeWidth} fill="none" strokeDasharray={circumference} strokeDashoffset={cOffset} strokeLinecap="round" className="transition-all duration-1000 ease-out" />
+          {/* Protein */}
+          <circle cx={size/2} cy={size/2} r={radius} stroke="#0EA5E9" strokeWidth={strokeWidth} fill="none" strokeDasharray={circumference} strokeDashoffset={pOffset} strokeLinecap="round" className="transition-all duration-1000 ease-out" />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+          <span className="text-2xl font-black text-white leading-none">{calories}</span>
+          <span className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-1">{ui.calories}</span>
+        </div>
+      </div>
+      <div className="flex gap-4">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-[#0EA5E9]" />
+          <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">{protein}g {ui.protein}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-[#F59E0B]" />
+          <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">{carbs}g {ui.carbs}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-[#EF4444]" />
+          <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">{fats}g {ui.fats}</span>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default function App() {
@@ -194,6 +272,12 @@ export default function App() {
   const [allergies, setAllergies] = useState(localStorage.getItem('dishdash_allergies') || "");
   const [pantry, setPantry] = useState(localStorage.getItem('dishdash_pantry') || "");
   const [mealPlan, setMealPlan] = useState(JSON.parse(localStorage.getItem('dishdash_mealplan')) || {});
+  const [substitutions, setSubstitutions] = useState(null);
+  const [generatingSubstitutions, setGeneratingSubstitutions] = useState(false);
+  const [showEdibleWarning, setShowEdibleWarning] = useState(false);
+  const [nonEdibleItems, setNonEdibleItems] = useState("");
+  const [pendingIngredients, setPendingIngredients] = useState("");
+  const [validatingEdibility, setValidatingEdibility] = useState(false);
 
   const extractSteps = (text) => {
     if (!text) return [];
@@ -315,25 +399,49 @@ export default function App() {
     return data.choices[0].message.content;
   };
 
-  const generateRecipe = async (inputStr) => {
+  const generateRecipe = async (inputStr, skipCheck = false) => {
     const finalIngredients = inputStr || ingredients;
     if (!finalIngredients) return;
     if (!apiKey) {
       showToast(ui.setupHint, 'error');
       return;
     }
+
     setLoading(true);
+    setValidatingEdibility(true);
     setHealthData(null);
+
     try {
-      const prompt = `ROLE: Michelin-star Chef. \nINGREDIENTS: ${finalIngredients} \nPANTRY (Always Available): ${pantry || 'None'} \nMEAL TYPE: ${mealType !== 'None' ? mealType : 'Any'} \nMODE: ${mode} \nLANGUAGE: ${language} \nCONTEXT: ${ui.secret} \nALLERGIES: ${allergies || 'None'} \nFormat: # [Title] \nTime: [X] mins \nDifficulty: [E/M/H] \n## Steps \n1...`;
-      const text = await callAI(prompt);
-      setRecipe(text);
-      setHistory(prev => [text, ...prev].slice(0, 10));
+      const checkPrompt = `LIST: ${finalIngredients}. Identify any items that are NOT edible or typically found in food. Respond with ONLY the non-edible items separated by commas, or "OK" if everything is edible or could be food. Be very strict (e.g. Paper, Metal, Plastic are non-edible). Language: ${language}`;
+      const recipePrompt = `ROLE: Michelin-star Chef. \nINGREDIENTS: ${finalIngredients} \nPANTRY (Always Available): ${pantry || 'None'} \nMEAL TYPE: ${mealType !== 'None' ? mealType : 'Any'} \nMODE: ${mode} \nLANGUAGE: ${language} \nCONTEXT: ${ui.secret} \nALLERGIES: ${allergies || 'None'} \nFormat: # [Title] \nTime: [X] mins \nDifficulty: [E/M/H] \n## Steps \n1...`;
+
+      // Parallel calls start here
+      const checkPromise = skipCheck || inputStr ? Promise.resolve("OK") : callAI(checkPrompt);
+      const recipePromise = callAI(recipePrompt);
+
+      // Await check first for faster interception
+      const checkResult = await checkPromise;
+
+      if (checkResult && checkResult.trim().toUpperCase() !== "OK") {
+        setNonEdibleItems(checkResult);
+        setPendingIngredients(finalIngredients);
+        setShowEdibleWarning(true);
+        return;
+      }
+
+      // If check is OK, await the recipe
+      const recipeText = await recipePromise;
+
+      setRecipe(recipeText);
+      setHistory(prev => [recipeText, ...prev].slice(0, 10));
       setShoppingList(null);
+      setSubstitutions(null);
     } catch (error) {
+      console.error("Recipe generation failed", error);
       setRecipe(`Error: ${error.message}`);
     } finally {
       setLoading(false);
+      setValidatingEdibility(false);
     }
   };
 
@@ -344,16 +452,54 @@ export default function App() {
       return;
     }
     setAnalyzingHealth(true);
+    setHealthData(null);
+
     try {
-      const prompt = `Analyze this recipe: ${recipe}. Return ONLY a score 1-100 of health and 4 short bullets in ${language}. Format: SCORE: [num] \n [bullets]`;
+      const prompt = `Analyze this recipe: ${recipe}. 
+Provide:
+1. Health Score (1-100)
+2. Protein (g)
+3. Carbs (g)
+4. Fats (g)
+5. Calories
+6. 4 health bullets in ${language}
+Format:
+SCORE: [num]
+PROTEIN: [num]
+CARBS: [num]
+FATS: [num]
+CALORIES: [num]
+BULLETS:
+- [bullet]
+Return ONLY this text.`;
+
       const result = await callAI(prompt);
-      const scoreMatch = result.match(/SCORE:\s*(\d+)/i);
+      console.log("Health Analysis Result Layer:", result);
+
+      if (!result) throw new Error("No response from AI");
+
+      const extractNum = (regex, fallback = 0) => {
+        const m = result.match(regex);
+        return m ? parseInt(m[1].replace(/[^\d]/g, '')) : fallback;
+      };
+
+      const score = extractNum(/SCORE:\s*(\d+)/i, 50);
+      const protein = extractNum(/PROTEIN:\s*(\d+)/i);
+      const carbs = extractNum(/CARBS:\s*(\d+)/i);
+      const fats = extractNum(/FATS:\s*(\d+)/i);
+      const calories = extractNum(/CALORIES:\s*(\d+)/i);
+
+      const bulletsPart = result.split(/BULLETS:/i)[1];
+      const bullets = bulletsPart ? bulletsPart.trim() : result.match(/- .+/g)?.join('\n') || "";
+
       setHealthData({
-        score: scoreMatch ? parseInt(scoreMatch[1]) : 50,
-        bullets: result.replace(/SCORE:\s*\d+/i, '').trim()
+        score,
+        macros: { protein, carbs, fats, calories },
+        bullets
       });
-    } catch {
-      showToast("Health analysis failed");
+    } catch (err) {
+      console.error("Health Analysis Failure Detail:", err);
+      showToast(`Analysis: ${err.message || "Parsing Error"}`, 'error');
     } finally {
       setAnalyzingHealth(false);
     }
@@ -399,6 +545,28 @@ export default function App() {
       showToast(`Error: ${err.message}. Please try again.`);
     } finally {
       setGeneratingList(false);
+    }
+  };
+
+  const handleGetSubstitutions = async () => {
+    if (!recipe) return;
+    if (!apiKey) {
+      showToast(ui.setupHint, 'error');
+      return;
+    }
+    setGeneratingSubstitutions(true);
+    try {
+      const prompt = `Based on this recipe, suggest common substitutions for the main ingredients in case the user is missing them. 
+      RECIPE: ${recipe}
+      OUTPUT: Provide a concise list of ingredient -> substitution(s). Use markdown formatting.
+      LANGUAGE: ${language}`;
+      
+      const result = await callAI(prompt);
+      setSubstitutions(result);
+    } catch (err) {
+      showToast(`Error: ${err.message}`, 'error');
+    } finally {
+      setGeneratingSubstitutions(false);
     }
   };
 
@@ -592,7 +760,7 @@ export default function App() {
               ingredients={ingredients} 
               setIngredients={setIngredients} 
               onRoll={() => generateRecipe()} 
-              loading={loading}
+              loading={loading || validatingEdibility}
               ui={ui}
             />
 
@@ -737,6 +905,15 @@ export default function App() {
                   </button>
 
                   <button
+                    onClick={handleGetSubstitutions}
+                    disabled={generatingSubstitutions}
+                    className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-orange-500/20 border border-orange-500/20 text-orange-400 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-orange-500/30"
+                  >
+                    <Replace size={14} className="md:w-4 md:h-4" />
+                    <span className="hidden xs:inline">{generatingSubstitutions ? ui.submitting : ui.substitute}</span>
+                  </button>
+
+                  <button
                     onClick={() => setIsCookingMode(true)}
                     className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-yellow-500 text-black font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-yellow-400"
                   >
@@ -755,24 +932,29 @@ export default function App() {
                 )}
 
                 {healthData && (
-                  <div className="p-6 md:p-8 rounded-[24px] md:rounded-[32px] bg-white/5 border border-white/10 animate-fade-in">
-                    <div className="flex items-center gap-4 md:gap-6 mb-4 md:mb-6">
-                      <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl bg-green-500/20 flex flex-col items-center justify-center border border-green-500/20 shadow-inner">
-                        <span className="text-2xl md:text-3xl font-black text-green-500">{healthData.score}</span>
-                        <span className="text-[7px] md:text-[8px] font-black text-green-500/60 tracking-widest uppercase">{ui.scoreLabel}</span>
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="text-white font-black text-base md:text-lg mb-1 md:mb-2 uppercase tracking-tight">{ui.healthHeading}</h4>
-                        <div className="w-full h-1.5 md:h-2 bg-white/5 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-green-500 transition-all duration-1000 shadow-[0_0_10px_rgba(34,197,94,0.5)]" 
-                            style={{ width: `${healthData.score}%` }} 
-                          />
+                  <div className="p-6 md:p-8 rounded-[24px] md:rounded-[32px] bg-white/5 border border-white/10 animate-fade-in space-y-8">
+                    <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+                      <MacroDonut macros={healthData.macros} ui={ui} />
+                      
+                      <div className="flex-1 space-y-6">
+                        <div className="flex items-center gap-4">
+                          <div className={`text-4xl font-black ${healthData.score > 70 ? 'text-green-500' : healthData.score > 40 ? 'text-yellow-500' : 'text-red-500'}`}>
+                            {healthData.score}
+                          </div>
+                          <div>
+                            <h4 className="text-white font-black text-sm uppercase tracking-widest">{ui.scoreLabel}</h4>
+                            <div className="w-32 h-1.5 bg-white/5 rounded-full mt-1 overflow-hidden">
+                              <div 
+                                className={`h-full transition-all duration-1000 ${healthData.score > 70 ? 'bg-green-500' : healthData.score > 40 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                                style={{ width: `${healthData.score}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="prose prose-invert prose-xs md:prose-sm max-w-none text-white/50 space-y-2">
+                          <Markdown>{healthData.bullets}</Markdown>
                         </div>
                       </div>
-                    </div>
-                    <div className="prose prose-invert prose-xs md:prose-sm max-w-none text-white/60">
-                      <Markdown>{healthData.bullets}</Markdown>
                     </div>
                   </div>
                 )}
@@ -834,6 +1016,36 @@ export default function App() {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+
+                {generatingSubstitutions && !substitutions && (
+                  <div className="p-6 md:p-8 rounded-[24px] md:rounded-[32px] bg-white/5 border border-white/10 animate-pulse flex flex-col items-center justify-center space-y-4">
+                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl md:rounded-2xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
+                      <Replace size={32} className="text-orange-500" />
+                    </div>
+                    <p className="text-white/40 text-[10px] md:text-xs font-black uppercase tracking-widest">{ui.submitting}</p>
+                  </div>
+                )}
+
+                {substitutions && (
+                  <div className="p-6 md:p-8 rounded-[24px] md:rounded-[32px] bg-white/5 border border-white/10 animate-fade-in space-y-6">
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-white font-black text-base md:text-lg uppercase tracking-tight flex items-center gap-2">
+                        <Replace size={20} className="text-orange-500" />
+                        {ui.subTitle}
+                      </h4>
+                      <button 
+                        onClick={() => setSubstitutions(null)}
+                        className="text-white/40 hover:text-white"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                    <div className="prose prose-invert prose-sm max-w-none text-white/70">
+                      <Markdown>{substitutions}</Markdown>
                     </div>
                   </div>
                 )}
@@ -925,6 +1137,41 @@ export default function App() {
               >
                 Save Changes
               </button>
+            </div>
+          </div>
+        )}
+
+        {showEdibleWarning && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 animate-fade-in">
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setShowEdibleWarning(false)} />
+            <div className="relative w-full max-w-md bg-[#121212] border-2 border-orange-500 rounded-[32px] p-8 space-y-6 shadow-[0_0_50px_rgba(249,115,22,0.2)]">
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="w-20 h-20 rounded-2xl bg-orange-500/20 flex items-center justify-center border border-orange-500/30">
+                  <Activity size={40} className="text-orange-500 animate-pulse" />
+                </div>
+                <h3 className="text-2xl font-black tracking-tight uppercase text-orange-500">{ui.edibleWarning}</h3>
+                <p className="text-white/60 text-sm font-medium">
+                  {ui.edibleDesc} <span className="text-white font-bold italic">"{nonEdibleItems}"</span>. {ui.edibleProceed}
+                </p>
+              </div>
+              
+              <div className="flex flex-col gap-3">
+                <button 
+                  onClick={() => {
+                    setShowEdibleWarning(false);
+                    generateRecipe(pendingIngredients, true);
+                  }}
+                  className="w-full h-14 rounded-2xl bg-orange-500 text-black font-black uppercase tracking-widest text-xs hover:bg-orange-400 transition-all"
+                >
+                  {ui.edibleConfirm}
+                </button>
+                <button 
+                  onClick={() => setShowEdibleWarning(false)}
+                  className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-white/60 font-black uppercase tracking-widest text-xs hover:bg-white/10 transition-all"
+                >
+                  {ui.edibleCancel}
+                </button>
+              </div>
             </div>
           </div>
         )}
