@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, X, Sparkles, ChefHat, Heart } from 'lucide-react';
+import { Calendar, X, Sparkles, ChefHat, Heart, Loader2 } from 'lucide-react';
 
 const DAYS = {
   English: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
@@ -42,10 +42,11 @@ export default function CalendarView({ mealPlan, setMealPlan, favorites, setReci
 
         <button 
           onClick={onGenerateWeek}
-          className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-black uppercase tracking-widest text-xs hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-yellow-500/20"
+          disabled={loading}
+          className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-black uppercase tracking-widest text-xs hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-yellow-500/20 disabled:opacity-50"
         >
-          <Sparkles size={18} />
-          {language === 'Español' ? 'Generar Semana con IA' : 'Generate Week with AI'}
+          {loading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
+          {loading ? (language === 'Español' ? 'Cocinando Plan...' : 'Whisking Plan...') : (language === 'Español' ? 'Generar Semana con IA' : 'Generate Week with AI')}
         </button>
       </div>
 

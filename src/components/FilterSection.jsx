@@ -1,4 +1,4 @@
-import { ChevronDown, Globe, Zap, Camera, Utensils } from 'lucide-react';
+import { ChevronDown, Globe, Zap, Camera, Utensils, Loader2 } from 'lucide-react';
 
 export default function FilterSection({ 
   language, 
@@ -76,12 +76,14 @@ export default function FilterSection({
       ))}
 
       {supportsVision && (
-        <label htmlFor="image-upload-input" className="bg-white/5 border-2 border-dashed border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-white/10 hover:border-yellow-500/50 transition-all duration-300 group">
-          <input id="image-upload-input" type="file" accept="image/*" className="hidden" onChange={onImageUpload} />
-          <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-white/40 group-hover:text-yellow-500 transition-colors">
-            <Camera size={24} />
+        <label htmlFor="image-upload-input" className={`bg-white/5 border-2 border-dashed border-white/10 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 transition-all duration-300 group ${loading ? 'opacity-50 cursor-wait pointer-events-none' : 'cursor-pointer hover:bg-white/10 hover:border-yellow-500/50'}`}>
+          <input id="image-upload-input" type="file" accept="image/*" className="hidden" onChange={onImageUpload} disabled={loading} />
+          <div className={`w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center transition-colors ${loading ? 'text-yellow-500' : 'text-white/40 group-hover:text-yellow-500'}`}>
+            {loading ? <Loader2 size={24} className="animate-spin" /> : <Camera size={24} />}
           </div>
-          <span className="text-[10px] text-white/40 font-black uppercase tracking-widest group-hover:text-white transition-colors">{ui.filterImage}</span>
+          <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${loading ? 'text-white' : 'text-white/40 group-hover:text-white'}`}>
+            {loading ? (language === 'Español' ? 'Analizando...' : 'Analyzing...') : ui.filterImage}
+          </span>
         </label>
       )}
     </div>

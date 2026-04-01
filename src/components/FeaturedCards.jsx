@@ -1,4 +1,4 @@
-import { Sparkles, Soup, ArrowRight } from 'lucide-react';
+import { Sparkles, Soup, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function FeaturedCards({ onRandom, onDaily, ui, loading }) {
   const cards = [
@@ -44,9 +44,10 @@ export default function FeaturedCards({ onRandom, onDaily, ui, loading }) {
             <p className="text-white/60 text-xs md:text-lg max-w-[320px] mb-auto font-medium leading-snug">
               {card.description}
             </p>
-            <button disabled={loading} className={`${card.btnColor} px-6 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest flex items-center gap-3 group-hover:gap-5 transition-all duration-300`}>
+            <button disabled={loading} className={`${card.btnColor} px-6 md:px-8 py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest flex items-center gap-3 transition-all duration-300`}>
+              {loading ? <Loader2 size={16} className="md:w-5 md:h-5 animate-spin" /> : null}
               {loading ? ui.loading : card.btnText}
-              {!loading && <ArrowRight size={18} />}
+              {!loading && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
             </button>
           </div>
         </div>

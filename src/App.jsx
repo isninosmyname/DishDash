@@ -10,7 +10,7 @@ import Toast from './components/Toast';
 import CookingMode from './components/CookingMode';
 import PantryView from './components/PantryView';
 import CalendarView from './components/CalendarView';
-import { X, Copy, Heart, Activity, Volume2, Square, ShoppingCart, CheckCircle2, Circle, Share, Flame, ChefHat, Replace } from 'lucide-react';
+import { X, Copy, Heart, Activity, Volume2, Square, ShoppingCart, CheckCircle2, Circle, Share, Flame, ChefHat, Replace, Loader2 } from 'lucide-react';
 
 const ingredientPools = { 
   base: ["chicken", "eggs", "rice", "pasta", "potato", "beans"], 
@@ -768,6 +768,7 @@ Return ONLY this text.`;
               onImageUpload={handleImageUpload}
               ui={ui}
               modelId={modelId}
+              loading={loading}
             />
 
             <FeaturedCards 
@@ -825,6 +826,7 @@ Return ONLY this text.`;
             language={language} 
             ui={ui} 
             onGenerateWeek={generateWeek}
+            loading={loading}
           />
         )}
 
@@ -875,35 +877,35 @@ Return ONLY this text.`;
                   <button
                     onClick={handleHealthCheck}
                     disabled={analyzingHealth}
-                    className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-green-500/20 border border-green-500/20 text-green-500 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-green-500/30"
+                    className="flex justify-center items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-green-500/20 border border-green-500/20 text-green-500 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-green-500/30 min-w-[130px]"
                   >
-                    <Activity size={14} className="md:w-4 md:h-4" />
+                    {analyzingHealth ? <Loader2 size={14} className="md:w-4 md:h-4 animate-spin" /> : <Activity size={14} className="md:w-4 md:h-4" />}
                     <span className="hidden sm:inline">{analyzingHealth ? ui.analyzing : ui.health}</span>
                   </button>
 
                   <button
                     onClick={toggleListen}
-                    className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-purple-500/20 border border-purple-500/20 text-purple-400 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-purple-500/30"
+                    className="flex justify-center items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-purple-500/20 border border-purple-500/20 text-purple-400 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-purple-500/30 min-w-[100px]"
                   >
-                    {listening ? <Square size={14} className="md:w-4 md:h-4" /> : <Volume2 size={14} className="md:w-4 md:h-4" />}
+                    {listening ? <Square size={14} className="md:w-4 md:h-4 text-red-500" /> : <Volume2 size={14} className="md:w-4 md:h-4" />}
                     <span className="hidden sm:inline">{listening ? ui.stop : ui.listen}</span>
                   </button>
 
                   <button
                     onClick={handleGenerateShoppingList}
                     disabled={generatingList}
-                    className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-yellow-500/20 border border-yellow-500/20 text-yellow-500 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-yellow-500/30"
+                    className="flex justify-center items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-yellow-500/20 border border-yellow-500/20 text-yellow-500 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-yellow-500/30 min-w-[140px]"
                   >
-                    <ShoppingCart size={14} className="md:w-4 md:h-4" />
+                    {generatingList ? <Loader2 size={14} className="md:w-4 md:h-4 animate-spin" /> : <ShoppingCart size={14} className="md:w-4 md:h-4" />}
                     <span className="hidden sm:inline">{generatingList ? ui.generating : ui.shoppingList}</span>
                   </button>
 
                   <button
                     onClick={handleGetSubstitutions}
                     disabled={generatingSubstitutions}
-                    className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-orange-500/20 border border-orange-500/20 text-orange-400 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-orange-500/30"
+                    className="flex justify-center items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-orange-500/20 border border-orange-500/20 text-orange-400 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-orange-500/30 min-w-[140px]"
                   >
-                    <Replace size={14} className="md:w-4 md:h-4" />
+                    {generatingSubstitutions ? <Loader2 size={14} className="md:w-4 md:h-4 animate-spin" /> : <Replace size={14} className="md:w-4 md:h-4" />}
                     <span className="hidden sm:inline">{generatingSubstitutions ? ui.submitting : ui.substitute}</span>
                   </button>
 

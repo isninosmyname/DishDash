@@ -1,4 +1,4 @@
-import { UtensilsCrossed } from 'lucide-react';
+import { UtensilsCrossed, Loader2 } from 'lucide-react';
 import apkUrl from '../assets/DishDash-0-0-1.apk';
 
 export default function Hero({ ingredients, setIngredients, onRoll, loading, ui }) {
@@ -32,14 +32,17 @@ export default function Hero({ ingredients, setIngredients, onRoll, loading, ui 
           disabled={loading}
           className="absolute right-1.5 top-1.5 bottom-1.5 px-3 md:px-10 rounded-lg md:rounded-2xl bg-gradient-to-tr from-[#DEB3C4] via-[#DEB3C4] to-[#FCE38A] text-black font-black uppercase tracking-widest text-[8px] md:text-sm hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group flex items-center gap-2 md:gap-3"
         >
+          {loading ? <Loader2 size={14} className="md:w-6 md:h-6 animate-spin" /> : null}
           {loading ? ui.loading : ui.button}
-          <div className="hidden md:flex w-5 h-5 bg-black/10 rounded items-center justify-center">
-            <div className="w-1.5 h-1.5 flex flex-wrap gap-0.5">
-              {[...Array(9)].map((_, i) => (
-                <div key={i} className="w-0.5 h-0.5 bg-black/40 rounded-full" />
-              ))}
+          {!loading && (
+            <div className="hidden md:flex w-5 h-5 bg-black/10 rounded items-center justify-center">
+              <div className="w-1.5 h-1.5 flex flex-wrap gap-0.5">
+                {[...Array(9)].map((_, i) => (
+                  <div key={i} className="w-0.5 h-0.5 bg-black/40 rounded-full" />
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </button>
       </div>
 
