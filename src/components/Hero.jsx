@@ -1,5 +1,5 @@
 import { UtensilsCrossed, Loader2 } from 'lucide-react';
-import apkUrl from '../assets/DishDash-0-0-1.apk';
+import apkUrl from '../assets/DishDash-1.2.apk';
 
 export default function Hero({ ingredients, setIngredients, onRoll, loading, ui }) {
   return (
@@ -49,7 +49,7 @@ export default function Hero({ ingredients, setIngredients, onRoll, loading, ui 
       <div className="mt-6 flex justify-center">
         <a
           href={apkUrl}
-          download="DishDash-0.0.1.apk"
+          download="DishDash-1.2.apk"
           className="flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all text-xs font-black uppercase tracking-widest"
         >
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
