@@ -706,7 +706,7 @@ Return ONLY this text.`;
       });
 
       if (Object.keys(newPlan).length === 0) {
-        throw new Error(language === 'Español' ? "Error al procesar el plan semanal" : "Failed to parse weekly plan");
+        throw new Error(language === 'Español' ? "Error al procesar el plan de la semana" : "Failed to parse weekly plan");
       }
 
       setMealPlan(newPlan);
