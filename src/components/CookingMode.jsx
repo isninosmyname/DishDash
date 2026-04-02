@@ -75,7 +75,7 @@ export default function CookingMode({ steps, onExit, language, ui }) {
   if (!steps || steps.length === 0) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] bg-[#0A0A0A] flex flex-col animate-fade-in text-white overflow-hidden">
+    <div className="fixed inset-0 z-[500] bg-[#0A0A0A] flex flex-col animate-fade-in text-white overflow-hidden">
       <div className="p-6 md:p-10 flex justify-between items-center border-b border-white/5">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-yellow-500">

@@ -298,7 +298,21 @@ export default function App() {
   };
 
   const mainContentRef = useRef(null);
-  const initialMount = useRef(true);
+
+  const handleSelectRecipe = (r) => {
+    if (!r) {
+      setRecipe("");
+      return;
+    }
+    setRecipe(r);
+    setHealthData(null);
+    setShoppingList(null);
+    setSubstitutions(null);
+    setIsCookingMode(false);
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTop = 0;
+    }
+  };
 
   const ui = uiTranslations[language] || uiTranslations.English;
 
@@ -362,10 +376,6 @@ export default function App() {
     localStorage.setItem('dishdash_mealplan', JSON.stringify(mealPlan));
     document.documentElement.lang = language === 'Español' ? 'es' : 'en';
   }, [apiKey, provider, modelId, history, favorites, theme, isAuthenticated, isOnboarded, user, language, allergies, pantry, mealPlan]);
-
-  useEffect(() => {
-    initialMount.current = false;
-  }, []);
 
   const callAI = async (payload, isVision = false) => {
     if (provider === "google") {
@@ -709,7 +719,7 @@ Return ONLY this text.`;
   };
 
   const handleNavigate = (id) => {
-    setActiveTab(id === 'home' ? 'Home' : id === 'favorites' ? 'Favorites' : id === 'pantry' ? 'Pantry' : id === 'calendar' ? 'Calendar' : 'Recent');
+    setActiveTab(id === 'home' ? 'Home' : id === 'favorites' ? 'Favorites' : id === 'recent' ? 'Recent' : id === 'pantry' ? 'Pantry' : id === 'calendar' ? 'Calendar' : 'Home');
     if (mainContentRef.current) mainContentRef.current.scrollTop = 0;
   };
 
@@ -786,7 +796,7 @@ Return ONLY this text.`;
               title={ui.favTitle}
               subtitle={ui.favSub}
               items={favorites}
-              onSelect={setRecipe}
+              onSelect={handleSelectRecipe}
               onDelete={(index) => setFavorites(prev => prev.filter((_, i) => i !== index))}
               type="favorites"
               emptyMessage={ui.noItems}
@@ -800,7 +810,7 @@ Return ONLY this text.`;
               title={ui.recentTitle}
               subtitle={ui.recentSub}
               items={history}
-              onSelect={setRecipe}
+              onSelect={handleSelectRecipe}
               onDelete={(index) => setHistory(prev => prev.filter((_, i) => i !== index))}
               type="history"
               emptyMessage={ui.noItems}
@@ -822,7 +832,7 @@ Return ONLY this text.`;
             mealPlan={mealPlan} 
             setMealPlan={setMealPlan} 
             favorites={favorites} 
-            setRecipe={setRecipe} 
+            onSelect={handleSelectRecipe} 
             language={language} 
             ui={ui} 
             onGenerateWeek={generateWeek}
@@ -831,8 +841,8 @@ Return ONLY this text.`;
         )}
 
         {recipe && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-0 md:p-6 animate-fade-in">
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setRecipe("")} />
+          <div className="fixed inset-0 z-[400] flex items-center justify-center p-0 md:p-6 animate-fade-in">
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => handleSelectRecipe("")} />
             <div className="relative w-full h-full md:h-auto md:max-w-4xl md:max-h-[90vh] bg-[#121212] md:border border-white/10 md:rounded-[40px] overflow-hidden flex flex-col shadow-2xl">
               <div className="p-6 md:p-10 border-b border-white/10 flex justify-between items-start">
                 <div className="flex items-center gap-4">
@@ -847,7 +857,7 @@ Return ONLY this text.`;
                   </div>
                 </div>
                 <button 
-                  onClick={() => setRecipe("")}
+                  onClick={() => handleSelectRecipe("")}
                   className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-all text-white/60 hover:text-white"
                 >
                   <X size={20} className="md:w-6 md:h-6" />
@@ -1055,7 +1065,7 @@ Return ONLY this text.`;
         )}
 
         {showSettings && (
-          <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 animate-fade-in">
+          <div className="fixed inset-0 z-[410] flex items-center justify-center p-6 animate-fade-in">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setShowSettings(false)} />
             <div className="relative w-full max-w-md bg-[#121212] border border-white/10 rounded-[32px] p-8 space-y-6">
               <div className="flex justify-between items-center mb-2">
@@ -1138,7 +1148,7 @@ Return ONLY this text.`;
         )}
 
         {showEdibleWarning && (
-          <div className="fixed inset-0 z-[150] flex items-center justify-center p-6 animate-fade-in">
+          <div className="fixed inset-0 z-[420] flex items-center justify-center p-6 animate-fade-in">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-xl" onClick={() => setShowEdibleWarning(false)} />
             <div className="relative w-full max-w-md bg-[#121212] border-2 border-orange-500 rounded-[32px] p-8 space-y-6 shadow-[0_0_50px_rgba(249,115,22,0.2)]">
               <div className="flex flex-col items-center text-center space-y-4">

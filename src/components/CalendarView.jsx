@@ -6,7 +6,7 @@ const DAYS = {
   Español: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
 };
 
-export default function CalendarView({ mealPlan, setMealPlan, favorites, setRecipe, language, ui, onGenerateWeek }) {
+export default function CalendarView({ mealPlan, setMealPlan, favorites, onSelect, language, ui, onGenerateWeek, loading }) {
   const [activeFavIndex, setActiveFavIndex] = useState(null);
   const days = DAYS[language] || DAYS.English;
 
@@ -63,7 +63,7 @@ export default function CalendarView({ mealPlan, setMealPlan, favorites, setReci
                   <div 
                     key={idx}
                     className="group relative p-3 rounded-xl bg-white/5 border border-white/10 hover:border-yellow-500/50 transition-all cursor-pointer"
-                    onClick={() => setRecipe(recipeText)}
+                    onClick={(e) => { e.stopPropagation(); onSelect(recipeText); }}
                   >
                     <button 
                       onClick={(e) => { e.stopPropagation(); removeFromPlan(day, idx); }}
@@ -104,18 +104,39 @@ export default function CalendarView({ mealPlan, setMealPlan, favorites, setReci
                 className="group relative space-y-3 cursor-pointer"
                 onClick={() => setActiveFavIndex(activeFavIndex === i ? null : i)}
               >
-                <div className="aspect-square rounded-2xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center p-4">
+                <div className="aspect-square rounded-2xl bg-white/5 border border-white/10 overflow-hidden flex items-center justify-center p-4 relative">
                   <ChefHat size={32} className="text-white/10 group-hover:text-yellow-500/20 transition-colors" />
-                  <div className={`absolute inset-0 bg-black/80 transition-all flex flex-col justify-center gap-1 p-2 ${activeFavIndex === i ? 'opacity-100' : 'opacity-0 md:group-hover:opacity-100 pointer-events-none md:pointer-events-auto'}`}>
-                    {days.map(day => (
-                      <button 
-                        key={day}
-                        onClick={(e) => { e.stopPropagation(); addToPlan(day, fav); setActiveFavIndex(null); }}
-                        className="w-full py-1.5 rounded-md bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest hover:bg-yellow-400 active:scale-95 transition-all"
-                      >
-                        {day.slice(0, 3)}
-                      </button>
-                    ))}
+                  
+                  {/* Selection Overlay */}
+                  <div className={`absolute inset-0 bg-black/90 backdrop-blur-sm transition-all flex flex-col justify-center gap-1.5 p-3 ${
+                    activeFavIndex === i 
+                    ? 'opacity-100 pointer-events-auto' 
+                    : 'opacity-0 pointer-events-none md:group-hover:opacity-100 md:group-hover:pointer-events-auto'
+                  }`}>
+                    <p className="text-[8px] font-black uppercase tracking-widest text-yellow-500 mb-1 text-center">
+                      {language === 'Español' ? 'Añadir a...' : 'Add to...'}
+                    </p>
+                    <div className="grid grid-cols-2 gap-1.5 overflow-y-auto custom-scrollbar pr-1">
+                      {days.map(day => (
+                        <button 
+                          key={day}
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            addToPlan(day, fav); 
+                            setActiveFavIndex(null); 
+                          }}
+                          className="py-2 rounded-lg bg-yellow-500 text-black text-[9px] font-black uppercase tracking-widest hover:bg-yellow-400 active:scale-90 transition-all flex items-center justify-center"
+                        >
+                          {day.slice(0, 3)}
+                        </button>
+                      ))}
+                    </div>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setActiveFavIndex(null); }}
+                      className="mt-1 w-full py-1.5 rounded-md border border-white/10 text-white/40 text-[8px] font-black uppercase hover:text-white transition-all"
+                    >
+                      {language === 'Español' ? 'Cancelar' : 'Cancel'}
+                    </button>
                   </div>
                 </div>
                 <p className="text-[10px] font-black uppercase tracking-tight leading-tight text-center line-clamp-2">{fav.split('\n')[0].replace('#', '').trim()}</p>

@@ -9,7 +9,8 @@ export default function FilterSection({
   setMealType,
   onImageUpload,
   ui,
-  modelId
+  modelId,
+  loading
 }) {
   const supportsVision = /gemini|gpt-4o|vision|claude-3/i.test(modelId || '');
   const filters = [
