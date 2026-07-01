@@ -16,6 +16,16 @@ http://disdash-backend-anz1fa-1af0fe-144-225-147-49.traefik.me/
 
 - **AI-Powered Recipes**: Generates creative meals based on the ingredients you provide.
 - **Multi-Language Support**: Currently supports English and Español.
+- **Favorites & Recent searches**: Store your recipes! (Account and database soon..)
+- **Planner**: Choose (favorite) recipes you would like for the week.
+- **Pantry**: Choose ingredients that you will always have. (Supports Custom Ingredients, Ingredients that are outside of the main list!)
+- **Allergies**: Specify allergies, or Food limitations.
+- **Meal types**: Choose between Any, Breakfast, Lunch and dinner.
+- **Substitutes**: With **AI**, find Substitutes of Ingredients. (May not taste the same!)
+- **Shopping list**: With **AI**, Make a shopping list and export to notes! (or other places) **Will Take a while!**
+- **Health check**: With **AI**, Check the health of the recipe! (**Will also take a while**)
+- **Hear recipe**: With browser-native **Web Speech API**, hear the recipe!
+- **Cooking mode**: Go step by step on what to do, supports mirophone!
 - **Neo-Brutalist Design**: A very good desing.  futuristic, 2026 style.
 - **Save**: Easily copy recipes to your clipboard.
 
@@ -71,15 +81,44 @@ http://disdash-backend-anz1fa-1af0fe-144-225-147-49.traefik.me/
 
 ---
 # Screenshots
-<img width="1280" height="800" alt="Captura de Pantalla 2026-03-30 a la(s) 8 15 17 a m" src="https://github.com/user-attachments/assets/0c1a82d1-6d79-424d-9710-c570429b0d58" />
+Main in computer:
 
-<img width="263" height="588" alt="image" src="https://github.com/user-attachments/assets/8063b075-3936-4c14-a349-b7b66c85993f" />
+<img width="1273" height="659" alt="image" src="https://github.com/user-attachments/assets/044d48a0-1bc1-4bc6-bf18-423ecdcdaabe" />
+
+
+Main in phone:
+
+<img width="232" height="499" alt="image" src="https://github.com/user-attachments/assets/69c6edc0-117c-44c3-bbb1-8a46f402174e" />
+
+Recipe UI:
+
+<img width="886" height="561" alt="image" src="https://github.com/user-attachments/assets/2ee87864-f7e8-4636-961c-3e70e133b820" />
+
+Planner UI:
+
+<img width="1001" height="636" alt="image" src="https://github.com/user-attachments/assets/3b69d254-bc47-4b2f-ac6d-9c82297110cc" />
+
+Pantry UI:
+
+<img width="998" height="640" alt="image" src="https://github.com/user-attachments/assets/b08fc235-8179-4222-841d-6fe676a47a6e" />
+
+Favorites UI:
+
+<img width="998" height="639" alt="image" src="https://github.com/user-attachments/assets/7183d583-ef89-41fe-b3f3-1b1abd2c1baf" />
+
+Recent Searches UI:
+
+<img width="999" height="637" alt="image" src="https://github.com/user-attachments/assets/ad71191c-1acb-4d57-a0e9-f4d88b0aa060" />
+
+Settings UI:
+
+<img width="439" height="559" alt="image" src="https://github.com/user-attachments/assets/ddda1c04-0e6c-43df-b976-bda222960bcf" />
 
 
 ---
 # Pushes to GitHub
 
-Feel free to push to GitHub! (Unless I dont accept the commit! (0/o\0))
+Feel free to push to GitHub! (Unless I dont accept the commit! (0_o_0))
 
 ---
 
