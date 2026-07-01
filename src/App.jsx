@@ -20,6 +20,29 @@ const ingredientPools = {
 
 const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
+const cleanTextForSpeech = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/```[\s\S]*?```/g, ' ')
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/~~(.*?)~~/g, '$1')
+    .replace(/`([^`]*)`/g, '$1')
+    .replace(/!\[[^\]]*\]\([^\)]*\)/g, ' ')
+    .replace(/\[([^\]]+)\]\([^\)]*\)/g, '$1')
+    .replace(/\#{1,6}\s*/g, ' ')
+    .replace(/^\s*[-*+]\s+/gm, ' ')
+    .replace(/^\s*\d+[\.\)]\s+/gm, ' ')
+    .replace(/\*/g, ' ')
+    .replace(/\n+/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+};
+
+const isSpeechSynthesisAvailable = () => typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined';
+
+const isSpeechRecognitionAvailable = () => typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition);
+
 const uiTranslations = {
   English: { 
     language: "Language", 
@@ -292,6 +315,14 @@ export default function App() {
     const id = Date.now();
     setToasts(prev => [...prev, { id, message, type }]);
   };
+
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   const removeToast = (id) => {
     setToasts(prev => prev.filter(t => t.id !== id));
@@ -659,16 +690,44 @@ Return ONLY this text.`;
   };
 
   const toggleListen = () => {
+    if (!isSpeechSynthesisAvailable()) {
+      showToast(language === 'Español' ? 'La lectura en voz alta no es compatible en este navegador.' : 'Text-to-speech is not supported in this browser.', 'error');
+      return;
+    }
+
     if (listening) {
-      window.speechSynthesis.cancel();
+      try {
+        window.speechSynthesis.cancel();
+      } catch (err) {
+        console.error('Failed to cancel speech synthesis:', err);
+      }
       setListening(false);
-    } else if (recipe) {
-      const utter = new SpeechSynthesisUtterance(recipe);
-      utter.lang = language === "English" ? "en-US" : "es-ES";
-      utter.onend = () => setListening(false);
+      return;
+    }
+
+    if (!recipe) {
+      showToast(language === 'Español' ? 'No hay receta para leer.' : 'No recipe is available to read aloud.', 'error');
+      return;
+    }
+
+    const textForSpeech = cleanTextForSpeech(recipe);
+    const utter = new SpeechSynthesisUtterance(textForSpeech);
+    utter.lang = language === 'English' ? 'en-US' : 'es-ES';
+    utter.onend = () => setListening(false);
+    utter.onerror = (event) => {
+      console.error('Speech synthesis error:', event);
+      setListening(false);
+      showToast(language === 'Español' ? 'Error al reproducir la voz.' : 'Speech playback failed.', 'error');
+    };
+
+    try {
       setUtterance(utter);
       window.speechSynthesis.speak(utter);
       setListening(true);
+    } catch (error) {
+      console.error('Speech synthesis start failed:', error);
+      setListening(false);
+      showToast(language === 'Español' ? 'No se pudo iniciar la lectura en voz alta.' : 'Unable to start speech playback.', 'error');
     }
   };
 
@@ -745,7 +804,7 @@ Return ONLY this text.`;
   }
 
   return (
-    <div className="flex bg-[#0A0A0A] min-h-screen text-white font-sans selection:bg-yellow-500/30">
+    <div className="flex flex-col md:flex-row bg-[#0A0A0A] min-h-screen text-white font-sans selection:bg-yellow-500/30">
       <Sidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab}
@@ -865,67 +924,74 @@ Return ONLY this text.`;
               </div>
 
               <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-6 md:space-y-8 custom-scrollbar">
-                <div className="flex gap-3 md:gap-4 flex-wrap">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 w-full">
                   <button
                     onClick={() => setFavorites(prev => prev.includes(recipe) ? prev.filter(f => f !== recipe) : [recipe, ...prev])}
-                    className={`flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest transition-all ${
+                    className={`w-full flex items-center justify-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl font-black text-[10px] md:text-xs uppercase tracking-widest transition-all ${
                       favorites.includes(recipe) ? 'bg-red-500 text-white' : 'bg-white/5 border border-white/10 text-white hover:bg-white/10'
                     }`}
                   >
                     <Heart size={14} className="md:w-4 md:h-4" fill={favorites.includes(recipe) ? "currentColor" : "none"} />
-                    <span className="hidden sm:inline">{favorites.includes(recipe) ? ui.remFav : ui.addFav}</span>
+                    <span className="inline">{favorites.includes(recipe) ? ui.remFav : ui.addFav}</span>
                   </button>
                   
                   <button
                     onClick={() => { navigator.clipboard.writeText(recipe); setCopyStatus(true); setTimeout(() => setCopyStatus(false), 2000) }}
-                    className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-white/10"
+                    className="w-full flex items-center justify-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-white/10"
                   >
                     <Copy size={14} className="md:w-4 md:h-4" />
-                    <span className="hidden sm:inline">{copyStatus ? ui.copied : ui.copy}</span>
+                    <span className="inline">{copyStatus ? ui.copied : ui.copy}</span>
                   </button>
 
                   <button
                     onClick={handleHealthCheck}
                     disabled={analyzingHealth}
-                    className="flex justify-center items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-green-500/20 border border-green-500/20 text-green-500 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-green-500/30 min-w-[130px]"
+                    className="w-full flex justify-center items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-green-500/20 border border-green-500/20 text-green-500 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-green-500/30"
                   >
                     {analyzingHealth ? <Loader2 size={14} className="md:w-4 md:h-4 animate-spin" /> : <Activity size={14} className="md:w-4 md:h-4" />}
-                    <span className="hidden sm:inline">{analyzingHealth ? ui.analyzing : ui.health}</span>
+                    <span className="inline">{analyzingHealth ? ui.analyzing : ui.health}</span>
                   </button>
 
                   <button
                     onClick={toggleListen}
-                    className="flex justify-center items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-purple-500/20 border border-purple-500/20 text-purple-400 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-purple-500/30 min-w-[100px]"
+                    disabled={!isSpeechSynthesisAvailable() || !recipe}
+                    className={`w-full flex justify-center items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-purple-500/20 border border-purple-500/20 text-purple-400 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-purple-500/30 ${(!isSpeechSynthesisAvailable() || !recipe) ? 'opacity-40 cursor-not-allowed hover:bg-purple-500/20' : ''}`}
                   >
                     {listening ? <Square size={14} className="md:w-4 md:h-4 text-red-500" /> : <Volume2 size={14} className="md:w-4 md:h-4" />}
-                    <span className="hidden sm:inline">{listening ? ui.stop : ui.listen}</span>
+                    <span className="inline">{listening ? ui.stop : ui.listen}</span>
                   </button>
 
                   <button
                     onClick={handleGenerateShoppingList}
                     disabled={generatingList}
-                    className="flex justify-center items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-yellow-500/20 border border-yellow-500/20 text-yellow-500 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-yellow-500/30 min-w-[140px]"
+                    className="w-full flex justify-center items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-yellow-500/20 border border-yellow-500/20 text-yellow-500 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-yellow-500/30"
                   >
                     {generatingList ? <Loader2 size={14} className="md:w-4 md:h-4 animate-spin" /> : <ShoppingCart size={14} className="md:w-4 md:h-4" />}
-                    <span className="hidden sm:inline">{generatingList ? ui.generating : ui.shoppingList}</span>
+                    <span className="inline">{generatingList ? ui.generating : ui.shoppingList}</span>
                   </button>
 
                   <button
                     onClick={handleGetSubstitutions}
                     disabled={generatingSubstitutions}
-                    className="flex justify-center items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-orange-500/20 border border-orange-500/20 text-orange-400 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-orange-500/30 min-w-[140px]"
+                    className="w-full flex justify-center items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-orange-500/20 border border-orange-500/20 text-orange-400 font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-orange-500/30"
                   >
                     {generatingSubstitutions ? <Loader2 size={14} className="md:w-4 md:h-4 animate-spin" /> : <Replace size={14} className="md:w-4 md:h-4" />}
-                    <span className="hidden sm:inline">{generatingSubstitutions ? ui.submitting : ui.substitute}</span>
+                    <span className="inline">{generatingSubstitutions ? ui.submitting : ui.substitute}</span>
                   </button>
 
                   <button
                     onClick={() => setIsCookingMode(true)}
-                    className="flex items-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-yellow-500 text-black font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-yellow-400"
+                    className="w-full flex items-center justify-center gap-2 md:gap-3 px-4 md:px-6 py-2 md:py-3 rounded-xl md:rounded-2xl bg-yellow-500 text-black font-black text-[10px] md:text-xs uppercase tracking-widest hover:bg-yellow-400"
                   >
                     <ChefHat size={14} className="md:w-4 md:h-4" />
-                    <span className="hidden sm:inline">{ui.startCooking}</span>
+                    <span className="inline">{ui.startCooking}</span>
                   </button>
+
+                  {!isSpeechSynthesisAvailable() && (
+                    <div className="sm:col-span-2 xl:col-span-4 text-[10px] text-red-300 uppercase tracking-widest mt-2">
+                      {language === 'Español' ? 'La lectura en voz alta no está disponible en este navegador.' : 'Text-to-speech is not available in this browser.'}
+                    </div>
+                  )}
                 </div>
 
                 {analyzingHealth && !healthData && (

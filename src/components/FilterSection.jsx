@@ -51,7 +51,7 @@ export default function FilterSection({
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 px-6 mb-16">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 px-6 mb-16">
       {filters.map((filter) => (
         <div key={filter.label} className="bg-white/5 border border-white/5 rounded-2xl p-4 md:p-6 transition-all duration-300 hover:bg-white/10">
           <label htmlFor={`filter-${filter.label}`} className="block text-[8px] md:text-[10px] text-white/40 font-black uppercase tracking-widest mb-1.5 md:mb-3">

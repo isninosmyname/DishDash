@@ -5,6 +5,7 @@ export default function CookingMode({ steps, onExit, language, ui }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isListening, setIsListening] = useState(false);
   const [recognition, setRecognition] = useState(null);
+  const speechRecognitionSupported = typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition);
 
   const nextStep = useCallback(() => {
     if (currentIndex < steps.length - 1) {
@@ -19,34 +20,41 @@ export default function CookingMode({ steps, onExit, language, ui }) {
   }, [currentIndex]);
 
   useEffect(() => {
+    if (!speechRecognitionSupported || recognition) return;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition && !recognition) {
-      const recog = new SpeechRecognition();
-      recog.continuous = true;
-      recog.interimResults = false;
-      recog.lang = language === 'Español' ? 'es-ES' : 'en-US';
+    if (!SpeechRecognition) return;
 
-      recog.onresult = (event) => {
-        const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
-        
-        if (command.includes('next') || command.includes('siguiente')) {
-          nextStep();
-        } else if (command.includes('back') || command.includes('anterior') || command.includes('atrás') || command.includes('atras')) {
-          prevStep();
-        } else if (command.includes('exit') || command.includes('salir') || command.includes('stop') || command.includes('parar')) {
-          onExit();
-        }
-      };
+    const recog = new SpeechRecognition();
+    recog.continuous = true;
+    recog.interimResults = false;
+    recog.lang = language === 'Español' ? 'es-ES' : 'en-US';
 
-      setRecognition(recog);
-    }
-
-    return () => {
-      if (recognition) {
-        recognition.stop();
+    recog.onresult = (event) => {
+      const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
+      if (command.includes('next') || command.includes('siguiente')) {
+        nextStep();
+      } else if (command.includes('back') || command.includes('anterior') || command.includes('atrás') || command.includes('atras')) {
+        prevStep();
+      } else if (command.includes('exit') || command.includes('salir') || command.includes('stop') || command.includes('parar')) {
+        onExit();
       }
     };
-  }, [language, nextStep, prevStep, onExit, recognition]);
+
+    recog.onerror = (event) => {
+      console.error('Speech recognition error:', event.error || event);
+      setIsListening(false);
+    };
+
+    recog.onnomatch = () => {
+      console.warn('Speech recognition no match.');
+    };
+
+    setRecognition(recog);
+
+    return () => {
+      recog.stop();
+    };
+  }, [language, nextStep, prevStep, onExit, recognition, speechRecognitionSupported]);
 
   useEffect(() => {
     if (recognition) {
@@ -63,12 +71,20 @@ export default function CookingMode({ steps, onExit, language, ui }) {
   }, [isListening, recognition]);
 
   const toggleListening = () => {
+    if (!speechRecognitionSupported) return;
+    if (!recognition) return;
+
     if (isListening) {
-      recognition?.stop();
+      recognition.stop();
       setIsListening(false);
     } else {
-      recognition?.start();
-      setIsListening(true);
+      try {
+        recognition.start();
+        setIsListening(true);
+      } catch (err) {
+        console.error('Failed to start recognition:', err);
+        setIsListening(false);
+      }
     }
   };
 
@@ -117,14 +133,24 @@ export default function CookingMode({ steps, onExit, language, ui }) {
 
         <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-6 text-white/20">
           <div className="flex flex-col items-center gap-2">
-            <div className={`w-16 h-16 rounded-full border-2 flex items-center justify-center transition-all cursor-pointer ${isListening ? 'bg-yellow-500 border-yellow-500 text-black shadow-[0_0_30px_rgba(234,179,8,0.4)]' : 'bg-white/5 border-white/10 hover:border-white/20'}`} onClick={toggleListening}>
+            <button
+              type="button"
+              disabled={!speechRecognitionSupported}
+              onClick={toggleListening}
+              className={`w-16 h-16 rounded-full border-2 flex items-center justify-center transition-all ${speechRecognitionSupported ? 'cursor-pointer' : 'cursor-not-allowed opacity-40'} ${isListening ? 'bg-yellow-500 border-yellow-500 text-black shadow-[0_0_30px_rgba(234,179,8,0.4)]' : 'bg-white/5 border-white/10 hover:border-white/20'}`}
+            >
               {isListening ? <Mic size={24} /> : <MicOff size={24} />}
-            </div>
+            </button>
             <span className={`text-[10px] font-black uppercase tracking-widest ${isListening ? 'text-yellow-500' : ''}`}>
               {isListening ? ui.cooking.listening : ui.cooking.voiceOff}
             </span>
           </div>
         </div>
+        {!speechRecognitionSupported && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-red-400 uppercase tracking-[0.2em] text-center px-4">
+            {language === 'Español' ? 'Comandos de voz no compatibles en este navegador.' : 'Voice commands are not supported in this browser.'}
+          </div>
+        )}
 
         <div className="absolute bottom-32 left-1/2 -translate-x-1/2 flex gap-4 text-[9px] font-bold uppercase tracking-[0.2em] text-white/10 whitespace-nowrap">
           {ui.cooking.commands.map((cmd, idx) => (

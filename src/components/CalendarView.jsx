@@ -52,7 +52,7 @@ export default function CalendarView({ mealPlan, setMealPlan, favorites, onSelec
 
       <div className="flex md:grid md:grid-cols-3 xl:grid-cols-7 gap-4 mb-12 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 -mx-6 px-6 md:mx-0 md:px-0">
         {days.map(day => (
-          <div key={day} className="flex flex-col gap-4 min-w-[280px] md:min-w-0 snap-center shrink-0">
+          <div key={day} className="flex flex-col gap-4 min-w-[220px] md:min-w-0 snap-center shrink-0">
             <h3 className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-white/30 py-2 border-b border-white/5">
               {day}
             </h3>

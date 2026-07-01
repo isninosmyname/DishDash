@@ -32,7 +32,7 @@ export default function RecipeList({ title, subtitle, items, onSelect, onDelete,
         {items.map((item, i) => (
           <div 
             key={i} 
-            className="group relative min-w-[280px] md:min-w-[340px]"
+            className="group relative w-full"
           >
             <div 
               onClick={() => onSelect(item)}
