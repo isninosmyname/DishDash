@@ -3,12 +3,11 @@
 **DishDash** is a minimalist, AI-powered recipe generator designed to help you cook with what you have.
 
 > Proyect created for the [Hackaton Midudev + CubePath 2026](https://github.com/midudev/hackaton-cubepath-2026), read my project in the [Issue #189](https://github.com/midudev/hackaton-cubepath-2026/issues/189). you can try the project at
-> http://disdash-backend-anz1fa-1af0fe-144-225-147-49.traefik.me/. (not working)
+> https://dishdash-dow.pages.dev/
 ---
 
 ## URL
-http://disdash-backend-anz1fa-1af0fe-144-225-147-49.traefik.me/
-(not working)
+[Click](https://dishdash-dow.pages.dev/)
 
 ---
 
