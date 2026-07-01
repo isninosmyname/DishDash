@@ -20,7 +20,10 @@ export default function FilterSection({
       icon: <Globe size={18} className="text-yellow-500" />, 
       options: [
         { label: 'English (US)', value: 'English' },
-        { label: 'Español', value: 'Español' }
+        { label: 'Español', value: 'Español' },
+        { label: 'Français', value: 'Français' },
+        { label: 'العربية', value: 'العربية' },
+        { label: '中文', value: '中文' }
       ],
       onChange: (e) => setLanguage(e.target.value)
     },
@@ -83,7 +86,7 @@ export default function FilterSection({
             {loading ? <Loader2 size={24} className="animate-spin" /> : <Camera size={24} />}
           </div>
           <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${loading ? 'text-white' : 'text-white/40 group-hover:text-white'}`}>
-            {loading ? (language === 'Español' ? 'Analizando...' : 'Analyzing...') : ui.filterImage}
+            {loading ? ui.analyzing : ui.filterImage}
           </span>
         </label>
       )}

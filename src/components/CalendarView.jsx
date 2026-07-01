@@ -3,7 +3,10 @@ import { Calendar, X, Sparkles, ChefHat, Heart, Loader2 } from 'lucide-react';
 
 const DAYS = {
   English: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-  Español: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+  Español: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
+  Français: ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"],
+  العربية: ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"],
+  中文: ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"]
 };
 
 export default function CalendarView({ mealPlan, setMealPlan, favorites, onSelect, language, ui, onGenerateWeek, loading }) {
@@ -35,7 +38,7 @@ export default function CalendarView({ mealPlan, setMealPlan, favorites, onSelec
           <div>
             <h1 className="text-4xl font-black tracking-tight uppercase italic">{ui.sidebar.calendar}</h1>
             <p className="text-white/40 text-sm font-medium uppercase tracking-widest">
-              {language === 'Español' ? 'Planifica tu semana culinaria' : 'Plan your culinary week'}
+              {ui.calendar.subtitle}
             </p>
           </div>
         </div>
@@ -46,7 +49,7 @@ export default function CalendarView({ mealPlan, setMealPlan, favorites, onSelec
           className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-gradient-to-r from-yellow-500 to-orange-500 text-black font-black uppercase tracking-widest text-xs hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-yellow-500/20 disabled:opacity-50"
         >
           {loading ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} />}
-          {loading ? (language === 'Español' ? 'Cocinando Plan...' : 'Whisking Plan...') : (language === 'Español' ? 'Generar Semana con IA' : 'Generate Week with AI')}
+          {loading ? ui.generating : ui.calendar.generate}
         </button>
       </div>
 
@@ -77,7 +80,7 @@ export default function CalendarView({ mealPlan, setMealPlan, favorites, onSelec
               })}
               {(!mealPlan[day] || mealPlan[day].length < 3) && (
                 <div className="flex-1 flex items-center justify-center border-2 border-dashed border-white/5 rounded-xl text-white/10 italic text-[10px]">
-                  {language === 'Español' ? 'Vacío' : 'Empty'}
+                  {ui.calendar.empty}
                 </div>
               )}
             </div>
@@ -88,9 +91,9 @@ export default function CalendarView({ mealPlan, setMealPlan, favorites, onSelec
       <div className="bg-[#121212] rounded-[40px] p-8 border border-white/5">
         <h3 className="text-lg font-black uppercase tracking-tight mb-6 flex items-center gap-3">
           <Heart size={20} className="text-red-500 fill-red-500" />
-          {language === 'Español' ? 'Tus Favoritos' : 'Your Favorites'}
+          {ui.calendar.favorites}
           <span className="text-white/20 text-xs font-normal lowercase tracking-normal ml-2">
-            ({language === 'Español' ? 'Toca un día para añadir' : 'Tap a day to add'})
+            ({ui.calendar.tapToAdd})
           </span>
         </h3>
         
@@ -114,7 +117,7 @@ export default function CalendarView({ mealPlan, setMealPlan, favorites, onSelec
                     : 'opacity-0 pointer-events-none md:group-hover:opacity-100 md:group-hover:pointer-events-auto'
                   }`}>
                     <p className="text-[8px] font-black uppercase tracking-widest text-yellow-500 mb-1 text-center">
-                      {language === 'Español' ? 'Añadir a...' : 'Add to...'}
+                      {ui.calendar.addTo}
                     </p>
                     <div className="grid grid-cols-2 gap-1.5 overflow-y-auto custom-scrollbar pr-1">
                       {days.map(day => (
@@ -135,7 +138,7 @@ export default function CalendarView({ mealPlan, setMealPlan, favorites, onSelec
                       onClick={(e) => { e.stopPropagation(); setActiveFavIndex(null); }}
                       className="mt-1 w-full py-1.5 rounded-md border border-white/10 text-white/40 text-[8px] font-black uppercase hover:text-white transition-all"
                     >
-                      {language === 'Español' ? 'Cancelar' : 'Cancel'}
+                      {ui.calendar.cancel}
                     </button>
                   </div>
                 </div>

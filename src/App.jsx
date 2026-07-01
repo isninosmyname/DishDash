@@ -43,29 +43,53 @@ const isSpeechSynthesisAvailable = () => typeof window !== 'undefined' && 'speec
 
 const isSpeechRecognitionAvailable = () => typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition);
 
+const LANGUAGE_LOCALES = {
+  English: 'en-US',
+  Español: 'es-ES',
+  Français: 'fr-FR',
+  العربية: 'ar-SA',
+  中文: 'zh-CN'
+};
+
+const HTML_LANGS = {
+  English: 'en',
+  Español: 'es',
+  Français: 'fr',
+  العربية: 'ar',
+  中文: 'zh'
+};
+
+const DAYS_BY_LANGUAGE = {
+  English: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+  Español: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
+  Français: ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"],
+  العربية: ["الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد"],
+  中文: ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"]
+};
+
 const uiTranslations = {
-  English: { 
-    language: "Language", 
-    button: "Roll It", 
-    loading: "Whisking...", 
-    settings: "Settings", 
-    placeholder: "Pasta, Garlic, 1 Lime...", 
-    mode: "Mode", 
-    selectFav: "Select a Favorite...", 
-    addFav: "Save to Favorites", 
-    remFav: "Remove Favorite", 
-    secret: "Chef's Secret", 
-    copy: "Copy Recipe", 
-    copied: "Copied!", 
-    clear: "Clear History", 
-    health: "Health Check", 
-    analyzing: "Analyzing...", 
-    modes: { quick: "Quick", detailed: "Detailed", healthy: "Healthy", budget: "Budget" }, 
-    theme: "Theme", 
-    light: "Light", 
-    dark: "Dark", 
-    listen: "Listen", 
-    stop: "Stop", 
+  English: {
+    language: "Language",
+    button: "Roll It",
+    loading: "Whisking...",
+    settings: "Settings",
+    placeholder: "Pasta, Garlic, 1 Lime...",
+    mode: "Mode",
+    selectFav: "Select a Favorite...",
+    addFav: "Save to Favorites",
+    remFav: "Remove Favorite",
+    secret: "Chef's Secret",
+    copy: "Copy Recipe",
+    copied: "Copied to Clipboard",
+    clear: "Clear History",
+    health: "Health Check",
+    analyzing: "Analyzing...",
+    modes: { quick: "Quick", detailed: "Detailed", healthy: "Healthy", budget: "Budget" },
+    theme: "Theme",
+    light: "Light",
+    dark: "Dark",
+    listen: "Listen",
+    stop: "Stop",
     daily: 'Daily recipe',
     heroTitle: "What's in your",
     heroKitchen: "Kitchen?",
@@ -91,7 +115,6 @@ const uiTranslations = {
     username: "Username",
     password: "Password",
     getStarted: "Enter Kitchen",
-    copied: "Copied to Clipboard",
     fillAll: "Please fill out all fields",
     setupHint: "Please enter your API Key to start cooking!",
     startCooking: "Start Cooking",
@@ -110,7 +133,8 @@ const uiTranslations = {
       finish: "Finish",
       listening: "Listening...",
       voiceOff: "Voice Off",
-      commands: ["Next", "Back", "Stop"]
+      commands: ["Next", "Back", "Stop"],
+      unsupported: "Voice commands are not supported in this browser."
     },
     substitute: "Substitutes",
     submitting: "Searching...",
@@ -125,29 +149,88 @@ const uiTranslations = {
     carbs: "Carbs",
     fats: "Fats",
     calories: "Calories",
+    ttsUnsupported: "Text-to-speech is not supported in this browser.",
+    noRecipeAvailable: "No recipe is available to read aloud.",
+    speechPlaybackFailed: "Speech playback failed.",
+    speechStartFailed: "Unable to start speech playback.",
+    weeklyGenerating: "Generating your culinary week...",
+    weeklyGenerated: "Weekly plan generated successfully!",
+    noResponseFromAI: "No response from AI",
+    weeklyParseError: "Failed to parse weekly plan",
+    onboarding: {
+      languageTitle: "Preferred Language",
+      languageSubtitle: "Set up your culinary experience in your tongue.",
+      sourceTitle: "How did you know about DishDash?",
+      sourceSubtitle: "Tell us a bit about how you found your way here.",
+      personalizeTitle: "Personalize Your Kitchen",
+      personalizeSubtitle: "Any dietary restrictions we should know about.",
+      allergiesLabel: "Allergies / Restrictions",
+      allergiesPlaceholder: "Peanuts, Gluten...",
+      aiTitle: "Your API Key",
+      aiSubtitle: "Connect the brain of your kitchen to start cooking.",
+      back: "Back",
+      continue: "Continue",
+      enterKitchen: "Enter Kitchen",
+      skipStep: "Skip Step",
+      selectSourceError: "Please select how you heard about us",
+      enterApiKeyError: "Please enter your API Key",
+      languageOptions: [
+        { label: 'English (US)', value: 'English' },
+        { label: 'Español', value: 'Español' },
+        { label: 'Français', value: 'Français' },
+        { label: 'العربية', value: 'العربية' },
+        { label: '中文', value: '中文' }
+      ],
+      sources: [
+        { id: 'social', label: 'Social Media', icon: '📱' },
+        { id: 'friend', label: 'From a Friend', icon: '🤝' },
+        { id: 'search', label: 'Search Engine', icon: '🔍' },
+        { id: 'ads', label: 'Advertisement', icon: '📺' },
+        { id: 'other', label: 'Other', icon: '✨' }
+      ]
+    },
+    pantry: {
+      description: "The AI will assume these ingredients are available for all your recipes. No need to type them every time!",
+      commonStaples: "Common Staples",
+      currentPantry: "Your Current Pantry",
+      empty: "Your pantry is empty...",
+      addCustom: "Add Custom",
+      unique: "Unique ingredients",
+      customHint: "e.g. Curry, Honey...",
+      addToPantry: "Add to Pantry"
+    },
+    calendar: {
+      subtitle: "Plan your culinary week",
+      generate: "Generate Week with AI",
+      empty: "Empty",
+      favorites: "Your Favorites",
+      tapToAdd: "Tap a day to add",
+      addTo: "Add to...",
+      cancel: "Cancel"
+    }
   },
-  Español: { 
-    language: "Idioma", 
-    button: "Cocinar", 
-    loading: "Batiendo...", 
-    settings: "Ajustes", 
-    placeholder: "Pasta, Ajo, 1 Limón...", 
-    mode: "Modo", 
-    selectFav: "Seleccionar Favorito...", 
-    addFav: "Guardar Favorito", 
-    remFav: "Eliminar Favorito", 
-    secret: "Secreto del Chef", 
-    copy: "Copiar Receta", 
-    copied: "¡Copiado!", 
-    clear: "Borrar Todo", 
-    health: "Análisis Salud", 
-    analyzing: "Analizando...", 
-    modes: { quick: "Rápido", detailed: "Detallado", healthy: "Saludable", budget: "Económico" }, 
-    theme: "Tema", 
-    light: "Claro", 
-    dark: "Oscuro", 
-    listen: "Escuchar", 
-    stop: "Parar", 
+  Español: {
+    language: "Idioma",
+    button: "Cocinar",
+    loading: "Batiendo...",
+    settings: "Ajustes",
+    placeholder: "Pasta, Ajo, 1 Limón...",
+    mode: "Modo",
+    selectFav: "Seleccionar Favorito...",
+    addFav: "Guardar Favorito",
+    remFav: "Eliminar Favorito",
+    secret: "Secreto del Chef",
+    copy: "Copiar Receta",
+    copied: "Copiado al Portapapeles",
+    clear: "Borrar Todo",
+    health: "Análisis Salud",
+    analyzing: "Analizando...",
+    modes: { quick: "Rápido", detailed: "Detallado", healthy: "Saludable", budget: "Económico" },
+    theme: "Tema",
+    light: "Claro",
+    dark: "Oscuro",
+    listen: "Escuchar",
+    stop: "Parar",
     daily: 'Receta diaria',
     heroTitle: "¿Qué hay en tu",
     heroKitchen: "Cocina?",
@@ -173,7 +256,6 @@ const uiTranslations = {
     username: "Usuario",
     password: "Contraseña",
     getStarted: "Entrar a la Cocina",
-    copied: "Copiado al Portapapeles",
     fillAll: "Por favor complete todos los campos",
     setupHint: "¡Por favor ingrese su clave API para comenzar a cocinar!",
     startCooking: "Empezar a Cocinar",
@@ -192,7 +274,8 @@ const uiTranslations = {
       finish: "Finalizar",
       listening: "Escuchando...",
       voiceOff: "Voz Desactivada",
-      commands: ["Siguiente", "Atrás", "Parar"]
+      commands: ["Siguiente", "Atrás", "Parar"],
+      unsupported: "Los comandos de voz no son compatibles con este navegador."
     },
     substitute: "Sustitutos",
     submitting: "Buscando...",
@@ -207,6 +290,488 @@ const uiTranslations = {
     carbs: "Carbs",
     fats: "Grasas",
     calories: "Calorías",
+    ttsUnsupported: "La lectura en voz alta no es compatible en este navegador.",
+    noRecipeAvailable: "No hay receta para leer.",
+    speechPlaybackFailed: "Error al reproducir la voz.",
+    speechStartFailed: "No se pudo iniciar la lectura en voz alta.",
+    weeklyGenerating: "Generando tu semana culinary...",
+    weeklyGenerated: "¡Semana generada con éxito!",
+    noResponseFromAI: "No se recibió respuesta de la IA",
+    weeklyParseError: "Error al procesar el plan de la semana",
+    onboarding: {
+      languageTitle: "Elige tu idioma",
+      languageSubtitle: "Configura tu experiencia culinaria",
+      sourceTitle: "¿Cómo nos conociste?",
+      sourceSubtitle: "Cuéntanos un poco sobre tu llegada",
+      personalizeTitle: "Personaliza tu Cocina",
+      personalizeSubtitle: "¿Tienes alguna restricción alimentaria?",
+      allergiesLabel: "Alergias / Restricciones",
+      allergiesPlaceholder: "Maníes, Gluten...",
+      aiTitle: "Configura tu IA",
+      aiSubtitle: "Conecta el cerebro de tu cocina para comenzar a cocinar.",
+      back: "Atrás",
+      continue: "Continuar",
+      enterKitchen: "Entrar a la Cocina",
+      skipStep: "Saltar Paso",
+      selectSourceError: "Por favor selecciona cómo nos conociste",
+      enterApiKeyError: "Por favor ingresa tu clave API",
+      languageOptions: [
+        { label: 'English (US)', value: 'English' },
+        { label: 'Español', value: 'Español' },
+        { label: 'Français', value: 'Français' },
+        { label: 'العربية', value: 'العربية' },
+        { label: '中文', value: '中文' }
+      ],
+      sources: [
+        { id: 'social', label: 'Redes Sociales', icon: '📱' },
+        { id: 'friend', label: 'Por un Amigo', icon: '🤝' },
+        { id: 'search', label: 'Buscador', icon: '🔍' },
+        { id: 'ads', label: 'Publicidad', icon: '📺' },
+        { id: 'other', label: 'Otro', icon: '✨' }
+      ]
+    },
+    pantry: {
+      description: "La IA asumirá que estos ingredientes están disponibles para todas tus recetas. ¡No necesitas escribirlos cada vez!",
+      commonStaples: "Básicos de Cocina",
+      currentPantry: "Tu Despensa Actual",
+      empty: "Tu despensa está vacía...",
+      addCustom: "Añadir Extra",
+      unique: "Ingredientes únicos",
+      customHint: "Ej: Curry, Miel...",
+      addToPantry: "Añadir a la Despensa"
+    },
+    calendar: {
+      subtitle: "Planifica tu semana culinaria",
+      generate: "Generar Semana con IA",
+      empty: "Vacío",
+      favorites: "Tus Favoritos",
+      tapToAdd: "Toca un día para añadir",
+      addTo: "Añadir a...",
+      cancel: "Cancelar"
+    }
+  },
+  Français: {
+    language: "Langue",
+    button: "Cuisiner",
+    loading: "Mélange...",
+    settings: "Paramètres",
+    placeholder: "Pâtes, Ail, 1 Citron...",
+    mode: "Mode",
+    selectFav: "Sélectionner un favori...",
+    addFav: "Ajouter aux favoris",
+    remFav: "Retirer le favori",
+    secret: "Secret du Chef",
+    copy: "Copier la recette",
+    copied: "Copié dans le presse-papiers",
+    clear: "Effacer l'historique",
+    health: "Analyse Santé",
+    analyzing: "Analyse...",
+    modes: { quick: "Rapide", detailed: "Détaillé", healthy: "Sain", budget: "Économique" },
+    theme: "Thème",
+    light: "Clair",
+    dark: "Sombre",
+    listen: "Écouter",
+    stop: "Arrêter",
+    daily: 'Recette du jour',
+    heroTitle: "Qu'y a-t-il dans votre",
+    heroKitchen: "Cuisine ?",
+    featuredRandom: { type: "DÉCOUVERTE", title: "Recette Aléatoire", desc: "Envie d'aventure? Laissez notre algorithme choisir une fusion d'ingrédients surprise." },
+    featuredDaily: { type: "QUOTIDIEN", title: "Recette du Jour", desc: "Le choix du chef axé sur des ingrédients de saison." },
+    favTitle: "Vos Favoris",
+    favSub: "Des recettes sélectionnées avec soin pour vous",
+    recentTitle: "Recettes Récentes",
+    recentSub: "Vos créations culinaires et recherches passées",
+    recipeHeading: "Votre Recette",
+    craftedBy: "Créé par DishDash AI",
+    healthHeading: "Analyse de Santé",
+    scoreLabel: "SCORE",
+    sidebar: { home: "Accueil", favs: "Favoris", recent: "Récentes", settings: "Paramètres", profile: "Ma Cuisine", pantry: "Garde-manger", calendar: "Planificateur" },
+    filterImage: "SCANER LES INGRÉDIENTS",
+    shoppingList: "Liste de Courses",
+    generating: "Génération...",
+    noItems: "Aucun article trouvé",
+    exportNotes: "Exporter vers Notes",
+    shareError: "Partage non supporté",
+    welcomeTitle: "Bienvenue sur DishDash",
+    welcomeSub: "Préparez votre cuisine",
+    username: "Nom d'utilisateur",
+    password: "Mot de passe",
+    getStarted: "Entrer dans la cuisine",
+    fillAll: "Veuillez remplir tous les champs",
+    setupHint: "Veuillez entrer votre clé API pour commencer à cuisiner!",
+    startCooking: "Commencer à cuisiner",
+    allergies: "Allergies",
+    allergiesHint: "Arachides, Gluten, Produits laitiers...",
+    mealType: "Type de repas",
+    mealTypes: { none: "N'importe", breakfast: "Petit-déjeuner", lunch: "Déjeuner", dinner: "Dîner" },
+    downloadAPK: "Télécharger APK",
+    cooking: {
+      title: "Mode Cuisine",
+      step: "Étape",
+      of: "de",
+      instruction: "Instruction",
+      previous: "Précédent",
+      next: "Étape suivante",
+      finish: "Terminer",
+      listening: "Écoute...",
+      voiceOff: "Voix désactivée",
+      commands: ["Suivant", "Retour", "Arrêter"],
+      unsupported: "Les commandes vocales ne sont pas prises en charge dans ce navigateur."
+    },
+    substitute: "Substituts",
+    submitting: "Recherche...",
+    subTitle: "Substituts d'ingrédients",
+    edibleWarning: "Attention: éléments non comestibles détectés!",
+    edibleDetecting: "Vérification...",
+    edibleDesc: "Nous avons détecté des éléments qui pourraient ne pas être comestibles: ",
+    edibleProceed: "Êtes-vous sûr de vouloir continuer?",
+    edibleConfirm: "Continuer quand même",
+    edibleCancel: "Modifier les ingrédients",
+    protein: "Protéines",
+    carbs: "Glucides",
+    fats: "Graisses",
+    calories: "Calories",
+    ttsUnsupported: "La synthèse vocale n'est pas prise en charge dans ce navigateur.",
+    noRecipeAvailable: "Aucune recette disponible à lire.",
+    speechPlaybackFailed: "Lecture vocale échouée.",
+    speechStartFailed: "Impossible de démarrer la lecture vocale.",
+    weeklyGenerating: "Génération de votre semaine culinaire...",
+    weeklyGenerated: "Semaine générée avec succès!",
+    noResponseFromAI: "Aucune réponse de l'IA",
+    weeklyParseError: "Échec de l'analyse du plan hebdomadaire",
+    onboarding: {
+      languageTitle: "Choisissez votre langue",
+      languageSubtitle: "Configurez votre expérience culinaire.",
+      sourceTitle: "Comment avez-vous connu DishDash?",
+      sourceSubtitle: "Dites-nous comment vous êtes arrivé ici.",
+      personalizeTitle: "Personnalisez votre cuisine",
+      personalizeSubtitle: "Des restrictions alimentaires à signaler?",
+      allergiesLabel: "Allergies / Restrictions",
+      allergiesPlaceholder: "Arachides, Gluten...",
+      aiTitle: "Votre clé API",
+      aiSubtitle: "Connectez le cerveau de votre cuisine pour commencer à cuisiner.",
+      back: "Retour",
+      continue: "Continuer",
+      enterKitchen: "Entrer dans la cuisine",
+      skipStep: "Passer l'étape",
+      selectSourceError: "Veuillez sélectionner comment vous avez entendu parler de nous",
+      enterApiKeyError: "Veuillez entrer votre clé API",
+      languageOptions: [
+        { label: 'English (US)', value: 'English' },
+        { label: 'Español', value: 'Español' },
+        { label: 'Français', value: 'Français' },
+        { label: 'العربية', value: 'العربية' },
+        { label: '中文', value: '中文' }
+      ],
+      sources: [
+        { id: 'social', label: 'Réseaux sociaux', icon: '📱' },
+        { id: 'friend', label: "D'un ami", icon: '🤝' },
+        { id: 'search', label: 'Moteur de recherche', icon: '🔍' },
+        { id: 'ads', label: 'Publicité', icon: '📺' },
+        { id: 'other', label: 'Autre', icon: '✨' }
+      ]
+    },
+    pantry: {
+      description: "L'IA supposera que ces ingrédients sont disponibles pour toutes vos recettes. Pas besoin de les taper à chaque fois !",
+      commonStaples: "Ingrédients de base",
+      currentPantry: "Votre garde-manger actuel",
+      empty: "Votre garde-manger est vide...",
+      addCustom: "Ajouter personnalisé",
+      unique: "Ingrédients uniques",
+      customHint: "Ex: Curry, Miel...",
+      addToPantry: "Ajouter au garde-manger"
+    },
+    calendar: {
+      subtitle: "Planifiez votre semaine culinaire",
+      generate: "Générer la semaine avec l'IA",
+      empty: "Vide",
+      favorites: "Vos Favoris",
+      tapToAdd: "Appuyez sur un jour pour ajouter",
+      addTo: "Ajouter à...",
+      cancel: "Annuler"
+    }
+  },
+  العربية: {
+    language: "اللغة",
+    button: "اطبخ",
+    loading: "جارٍ الخلط...",
+    settings: "الإعدادات",
+    placeholder: "مكرونة، ثوم، 1 ليمونة...",
+    mode: "الوضع",
+    selectFav: "اختر مفضلة...",
+    addFav: "حفظ في المفضلة",
+    remFav: "إزالة المفضلة",
+    secret: "سر الشيف",
+    copy: "نسخ الوصفة",
+    copied: "تم النسخ إلى الحافظة",
+    clear: "مسح السجل",
+    health: "تحليل الصحة",
+    analyzing: "جارٍ التحليل...",
+    modes: { quick: "سريع", detailed: "مفصل", healthy: "صحي", budget: "اقتصادي" },
+    theme: "المظهر",
+    light: "فاتح",
+    dark: "داكن",
+    listen: "استمع",
+    stop: "إيقاف",
+    daily: 'وصفة اليوم',
+    heroTitle: "ما الموجود في",
+    heroKitchen: "مطبخك؟",
+    featuredRandom: { type: "اكتشاف", title: "وصفة عشوائية", desc: "هل تريد المغامرة؟ دع خوارزمية التطبيق تختار مزيجاً مفاجئاً من المكونات." },
+    featuredDaily: { type: "اليومي", title: "وصفة اليوم", desc: "اختيار الشيف يركز على المكونات الموسمية." },
+    favTitle: "المفضلات",
+    favSub: "وصفاتك المختارة بعناية",
+    recentTitle: "الوصفات الأخيرة",
+    recentSub: "إبداعاتك ووصفاتك السابقة",
+    recipeHeading: "وصفتك",
+    craftedBy: "من DishDash AI",
+    healthHeading: "تحليل الصحة",
+    scoreLabel: "النقاط",
+    sidebar: { home: "الرئيسية", favs: "المفضلة", recent: "المحفوظات", settings: "الإعدادات", profile: "مطبخي", pantry: "المخزن", calendar: "المخطط" },
+    filterImage: "فحص المكونات",
+    shoppingList: "قائمة التسوق",
+    generating: "توليد...",
+    noItems: "لا توجد عناصر",
+    exportNotes: "تصدير إلى الملاحظات",
+    shareError: "المشاركة غير مدعومة",
+    welcomeTitle: "مرحباً بك في DishDash",
+    welcomeSub: "جهز مطبخك",
+    username: "اسم المستخدم",
+    password: "كلمة المرور",
+    getStarted: "ادخل المطبخ",
+    fillAll: "يرجى ملء جميع الحقول",
+    setupHint: "يرجى إدخال مفتاح API الخاص بك لبدء الطهي!",
+    startCooking: "ابدأ الطهي",
+    allergies: "الحساسية",
+    allergiesHint: "فول سوداني، جلوتين، ألبان...",
+    mealType: "نوع الوجبة",
+    mealTypes: { none: "أي", breakfast: "فطور", lunch: "غداء", dinner: "عشاء" },
+    downloadAPK: "تحميل APK",
+    cooking: {
+      title: "وضع الطهي",
+      step: "الخطوة",
+      of: "من",
+      instruction: "تعليمات",
+      previous: "السابق",
+      next: "التالي",
+      finish: "إنهاء",
+      listening: "يستمع...",
+      voiceOff: "الصوت متوقف",
+      commands: ["التالي", "السابق", "توقف"],
+      unsupported: "أوامر الصوت غير مدعومة في هذا المتصفح."
+    },
+    substitute: "بدائل",
+    submitting: "جارٍ البحث...",
+    subTitle: "بدائل المكونات",
+    edibleWarning: "تحذير: تم اكتشاف عناصر غير صالحة للأكل!",
+    edibleDetecting: "جارٍ التحقق...",
+    edibleDesc: "اكتشفنا عناصر قد لا تكون صالحة للأكل: ",
+    edibleProceed: "هل أنت متأكد أنك تريد المتابعة؟",
+    edibleConfirm: "استمر على أي حال",
+    edibleCancel: "تعديل المكونات",
+    protein: "بروتين",
+    carbs: "كربوهيدرات",
+    fats: "دهون",
+    calories: "سعرات حرارية",
+    ttsUnsupported: "ميزة تحويل النص إلى كلام غير مدعومة في هذا المتصفح.",
+    noRecipeAvailable: "لا توجد وصفة للقراءة.",
+    speechPlaybackFailed: "فشل تشغيل الصوت.",
+    speechStartFailed: "تعذر بدء تشغيل الصوت.",
+    weeklyGenerating: "جارٍ توليد أسبوعك الطهي...",
+    weeklyGenerated: "تم إنشاء الأسبوع بنجاح!",
+    noResponseFromAI: "لا توجد استجابة من الذكاء الاصطناعي",
+    weeklyParseError: "فشل في معالجة خطة الأسبوع",
+    onboarding: {
+      languageTitle: "اختر لغتك",
+      languageSubtitle: "قم بإعداد تجربتك الطهوية.",
+      sourceTitle: "كيف عرفت DishDash؟",
+      sourceSubtitle: "أخبرنا كيف وصلت إلى هنا.",
+      personalizeTitle: "خصّص مطبخك",
+      personalizeSubtitle: "هل لديك قيود غذائية؟",
+      allergiesLabel: "الحساسية / القيود",
+      allergiesPlaceholder: "فول سوداني، جلوتين...",
+      aiTitle: "مفتاح API الخاص بك",
+      aiSubtitle: "قم بتوصيل عقل مطبخك للبدء في الطهي.",
+      back: "عودة",
+      continue: "متابعة",
+      enterKitchen: "ادخل المطبخ",
+      skipStep: "تخطي الخطوة",
+      selectSourceError: "يرجى اختيار كيف سمعت عنا",
+      enterApiKeyError: "يرجى إدخال مفتاح API الخاص بك",
+      languageOptions: [
+        { label: 'English (US)', value: 'English' },
+        { label: 'Español', value: 'Español' },
+        { label: 'Français', value: 'Français' },
+        { label: 'العربية', value: 'العربية' },
+        { label: '中文', value: '中文' }
+      ],
+      sources: [
+        { id: 'social', label: 'وسائل التواصل', icon: '📱' },
+        { id: 'friend', label: 'من صديق', icon: '🤝' },
+        { id: 'search', label: 'محرك البحث', icon: '🔍' },
+        { id: 'ads', label: 'إعلان', icon: '📺' },
+        { id: 'other', label: 'آخر', icon: '✨' }
+      ]
+    },
+    pantry: {
+      description: "سيفترض الذكاء الاصطناعي أن هذه المكونات متاحة لكل وصفاتك. لا حاجة لكتابتها في كل مرة!",
+      commonStaples: "المكونات الأساسية",
+      currentPantry: "مخزنك الحالي",
+      empty: "المخزن فارغ...",
+      addCustom: "إضافة مخصص",
+      unique: "مكونات فريدة",
+      customHint: "مثال: كاري، عسل...",
+      addToPantry: "أضف إلى المخزن"
+    },
+    calendar: {
+      subtitle: "خطط أسبوعك الطهي",
+      generate: "توليد الأسبوع بالذكاء الاصطناعي",
+      empty: "فارغ",
+      favorites: "المفضلات",
+      tapToAdd: "اضغط على يوم للإضافة",
+      addTo: "أضف إلى...",
+      cancel: "إلغاء"
+    }
+  },
+  中文: {
+    language: "语言",
+    button: "烹饪",
+    loading: "搅拌中...",
+    settings: "设置",
+    placeholder: "意面、大蒜、1个柠檬...",
+    mode: "模式",
+    selectFav: "选择收藏...",
+    addFav: "保存到收藏",
+    remFav: "移除收藏",
+    secret: "厨师的秘密",
+    copy: "复制食谱",
+    copied: "已复制到剪贴板",
+    clear: "清除历史",
+    health: "健康分析",
+    analyzing: "分析中...",
+    modes: { quick: "快速", detailed: "详细", healthy: "健康", budget: "经济" },
+    theme: "主题",
+    light: "浅色",
+    dark: "深色",
+    listen: "收听",
+    stop: "停止",
+    daily: '每日食谱',
+    heroTitle: "你的厨房里有什么",
+    heroKitchen: "？",
+    featuredRandom: { type: "发现", title: "随机食谱", desc: "想冒险吗？让我们的算法选择一个惊喜食材组合。" },
+    featuredDaily: { type: "每日精选", title: "每日食谱", desc: "主厨精选，专注当季食材。" },
+    favTitle: "你的收藏",
+    favSub: "你精心挑选的食谱",
+    recentTitle: "最近记录",
+    recentSub: "你过去的烹饪创意和搜索",
+    recipeHeading: "你的食谱",
+    craftedBy: "由 DishDash AI 制作",
+    healthHeading: "健康分析",
+    scoreLabel: "得分",
+    sidebar: { home: "首页", favs: "收藏", recent: "最近", settings: "设置", profile: "我的厨房", pantry: "储藏室", calendar: "计划" },
+    filterImage: "扫描食材",
+    shoppingList: "购物清单",
+    generating: "生成中...",
+    noItems: "未找到项目",
+    exportNotes: "导出到笔记",
+    shareError: "不支持分享",
+    welcomeTitle: "欢迎来到 DishDash",
+    welcomeSub: "设置你的厨房",
+    username: "用户名",
+    password: "密码",
+    getStarted: "进入厨房",
+    fillAll: "请填写所有字段",
+    setupHint: "请输入您的 API 密钥以开始烹饪！",
+    startCooking: "开始烹饪",
+    allergies: "过敏原",
+    allergiesHint: "花生, 麸质, 乳制品...",
+    mealType: "餐食类型",
+    mealTypes: { none: "任意", breakfast: "早餐", lunch: "午餐", dinner: "晚餐" },
+    downloadAPK: "下载 APK",
+    cooking: {
+      title: "烹饪模式",
+      step: "步骤",
+      of: "共",
+      instruction: "说明",
+      previous: "上一步",
+      next: "下一步",
+      finish: "完成",
+      listening: "正在收听...",
+      voiceOff: "语音关闭",
+      commands: ["下一步", "返回", "停止"],
+      unsupported: "此浏览器不支持语音命令。"
+    },
+    substitute: "替代品",
+    submitting: "搜索中...",
+    subTitle: "食材替代",
+    edibleWarning: "警告：检测到非食用项目！",
+    edibleDetecting: "检查中...",
+    edibleDesc: "我们检测到可能无法食用的项目： ",
+    edibleProceed: "您确定要继续吗？",
+    edibleConfirm: "仍然继续",
+    edibleCancel: "编辑食材",
+    protein: "蛋白质",
+    carbs: "碳水",
+    fats: "脂肪",
+    calories: "卡路里",
+    ttsUnsupported: "此浏览器不支持文本转语音。",
+    noRecipeAvailable: "没有可朗读的食谱。",
+    speechPlaybackFailed: "语音播放失败。",
+    speechStartFailed: "无法启动语音播放。",
+    weeklyGenerating: "正在生成您的烹饪周计划...",
+    weeklyGenerated: "周计划生成成功！",
+    noResponseFromAI: "未收到 AI 响应",
+    weeklyParseError: "无法解析每周计划",
+    onboarding: {
+      languageTitle: "选择您的语言",
+      languageSubtitle: "设置您的烹饪体验。",
+      sourceTitle: "您如何知道 DishDash 的？",
+      sourceSubtitle: "告诉我们您是如何来到这里的。",
+      personalizeTitle: "个性化您的厨房",
+      personalizeSubtitle: "您有任何饮食限制吗？",
+      allergiesLabel: "过敏原 / 限制",
+      allergiesPlaceholder: "例如：咖喱、蜂蜜...",
+      aiTitle: "您的 API 密钥",
+      aiSubtitle: "连接您的厨房大脑开始烹饪。",
+      back: "后退",
+      continue: "继续",
+      enterKitchen: "进入厨房",
+      skipStep: "跳过步骤",
+      selectSourceError: "请选择您如何听说我们的",
+      enterApiKeyError: "请输入您的 API 密钥",
+      languageOptions: [
+        { label: 'English (US)', value: 'English' },
+        { label: 'Español', value: 'Español' },
+        { label: 'Français', value: 'Français' },
+        { label: 'العربية', value: 'العربية' },
+        { label: '中文', value: '中文' }
+      ],
+      sources: [
+        { id: 'social', label: 'وسائل التواصل', icon: '📱' },
+        { id: 'friend', label: 'من صديق', icon: '🤝' },
+        { id: 'search', label: 'محرك البحث', icon: '🔍' },
+        { id: 'ads', label: 'إعلان', icon: '📺' },
+        { id: 'other', label: 'آخر', icon: '✨' }
+      ]
+    },
+    pantry: {
+      description: "AI 将假定这些食材可用于您的所有菜谱。无需每次重复输入！",
+      commonStaples: "常见食材",
+      currentPantry: "当前储藏室",
+      empty: "您的储藏室为空...",
+      addCustom: "添加自定义",
+      unique: "独特食材",
+      customHint: "例如：咖喱，蜂蜜...",
+      addToPantry: "添加到储藏室"
+    },
+    calendar: {
+      subtitle: "规划您的烹饪周",
+      generate: "生成 AI 周计划",
+      empty: "空",
+      favorites: "收藏",
+      tapToAdd: "点击某天添加",
+      addTo: "添加到...",
+      cancel: "取消"
+    }
   }
 };
 
@@ -405,7 +970,7 @@ export default function App() {
     localStorage.setItem('dishdash_allergies', allergies);
     localStorage.setItem('dishdash_pantry', pantry);
     localStorage.setItem('dishdash_mealplan', JSON.stringify(mealPlan));
-    document.documentElement.lang = language === 'Español' ? 'es' : 'en';
+    document.documentElement.lang = HTML_LANGS[language] || 'en';
   }, [apiKey, provider, modelId, history, favorites, theme, isAuthenticated, isOnboarded, user, language, allergies, pantry, mealPlan]);
 
   const callAI = async (payload, isVision = false) => {
@@ -691,7 +1256,7 @@ Return ONLY this text.`;
 
   const toggleListen = () => {
     if (!isSpeechSynthesisAvailable()) {
-      showToast(language === 'Español' ? 'La lectura en voz alta no es compatible en este navegador.' : 'Text-to-speech is not supported in this browser.', 'error');
+      showToast(ui.ttsUnsupported, 'error');
       return;
     }
 
@@ -706,18 +1271,18 @@ Return ONLY this text.`;
     }
 
     if (!recipe) {
-      showToast(language === 'Español' ? 'No hay receta para leer.' : 'No recipe is available to read aloud.', 'error');
+      showToast(ui.noRecipeAvailable, 'error');
       return;
     }
 
     const textForSpeech = cleanTextForSpeech(recipe);
     const utter = new SpeechSynthesisUtterance(textForSpeech);
-    utter.lang = language === 'English' ? 'en-US' : 'es-ES';
+    utter.lang = LANGUAGE_LOCALES[language] || 'en-US';
     utter.onend = () => setListening(false);
     utter.onerror = (event) => {
       console.error('Speech synthesis error:', event);
       setListening(false);
-      showToast(language === 'Español' ? 'Error al reproducir la voz.' : 'Speech playback failed.', 'error');
+      showToast(ui.speechPlaybackFailed, 'error');
     };
 
     try {
@@ -727,7 +1292,7 @@ Return ONLY this text.`;
     } catch (error) {
       console.error('Speech synthesis start failed:', error);
       setListening(false);
-      showToast(language === 'Español' ? 'No se pudo iniciar la lectura en voz alta.' : 'Unable to start speech playback.', 'error');
+      showToast(ui.speechStartFailed, 'error');
     }
   };
 
@@ -737,7 +1302,7 @@ Return ONLY this text.`;
       return;
     }
     setLoading(true);
-    showToast(language === 'Español' ? "Generando tu semana culinary..." : "Generating your culinary week...", 'info');
+    showToast(ui.weeklyGenerating, 'info');
     try {
       const prompt = `Michelin-star Chef. Generate a 7-day meal plan. Language: ${language}. Pantry (Always Available): ${pantry || 'None'}. Allergies (AVOID THESE): ${allergies || 'None'}.
       IMPORTANT: Generate exactly 7 different recipes, one for each day.
@@ -747,7 +1312,7 @@ Return ONLY this text.`;
       [Steps...]`;
       
       const text = await callAI(prompt);
-      if (!text) throw new Error(language === 'Español' ? "No se recibió respuesta de la IA" : "No response from AI");
+      if (!text) throw new Error(ui.noResponseFromAI);
       
       let recipes = text.split('---RECIPE---').map(r => r.trim()).filter(r => r.length > 20);
       
@@ -755,7 +1320,7 @@ Return ONLY this text.`;
         recipes = text.split(/\n(?=#)/).map(r => r.trim()).filter(r => r.length > 20);
       }
 
-      const days = language === 'Español' ? ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"] : ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+      const days = DAYS_BY_LANGUAGE[language] || DAYS_BY_LANGUAGE.English;
       const newPlan = {};
       
       days.forEach((day, i) => {
@@ -765,11 +1330,11 @@ Return ONLY this text.`;
       });
 
       if (Object.keys(newPlan).length === 0) {
-        throw new Error(language === 'Español' ? "Error al procesar el plan de la semana" : "Failed to parse weekly plan");
+        throw new Error(ui.weeklyParseError);
       }
 
       setMealPlan(newPlan);
-      showToast(language === 'Español' ? "¡Semana generada con éxito!" : "Weekly plan generated successfully!", 'success');
+      showToast(ui.weeklyGenerated, 'success');
     } catch (err) {
       showToast(err.message, 'error');
     } finally {
@@ -797,6 +1362,7 @@ Return ONLY this text.`;
       <Onboarding 
         language={language}
         setLanguage={setLanguage}
+        ui={ui}
         showToast={showToast}
         onComplete={handleOnboardingComplete}
       />
@@ -989,7 +1555,7 @@ Return ONLY this text.`;
 
                   {!isSpeechSynthesisAvailable() && (
                     <div className="sm:col-span-2 xl:col-span-4 text-[10px] text-red-300 uppercase tracking-widest mt-2">
-                      {language === 'Español' ? 'La lectura en voz alta no está disponible en este navegador.' : 'Text-to-speech is not available in this browser.'}
+                      {ui.ttsUnsupported}
                     </div>
                   )}
                 </div>

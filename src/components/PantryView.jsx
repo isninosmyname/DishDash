@@ -46,16 +46,14 @@ export default function PantryView({ pantry, setPantry, language, ui }) {
           </div>
           <div>
             <h1 className="text-4xl font-black tracking-tight uppercase italic">{ui.sidebar.pantry}</h1>
-            <p className="text-white/40 text-sm font-medium uppercase tracking-widest">{language === 'Español' ? 'Ingredientes que siempre tienes' : 'Ingredients you always have in stock'}</p>
+            <p className="text-white/40 text-sm font-medium uppercase tracking-widest">{ui.pantry.description}</p>
           </div>
         </div>
         
         <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-2xl p-4 flex items-start gap-4 max-w-2xl">
           <Info className="text-yellow-500 shrink-0 mt-1" size={18} />
           <p className="text-xs text-yellow-500/80 leading-relaxed font-medium">
-            {language === 'Español' 
-              ? 'La IA asumirá que estos ingredientes están disponibles para todas tus recetas. ¡No necesitas escribirlos cada vez!' 
-              : 'The AI will assume these ingredients are available for all your recipes. No need to type them every time!'}
+            {ui.pantry.description}
           </p>
         </div>
       </div>
@@ -65,7 +63,7 @@ export default function PantryView({ pantry, setPantry, language, ui }) {
           <section>
             <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white/30 mb-6 flex items-center gap-2">
               <span className="w-8 h-px bg-white/10"></span>
-              {language === 'Español' ? 'Básicos de Cocina' : 'Common Staples'}
+              {ui.pantry.commonStaples}
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {staples.map(item => (
@@ -87,11 +85,11 @@ export default function PantryView({ pantry, setPantry, language, ui }) {
 
           <section className="p-8 rounded-[32px] bg-white/5 border border-white/5">
             <h3 className="text-xs font-black uppercase tracking-[0.2em] text-white/30 mb-6">
-              {language === 'Español' ? 'Tu Despensa Actual' : 'Your Current Pantry'}
+              {ui.pantry.currentPantry}
             </h3>
             <div className="flex flex-wrap gap-2">
               {currentPantry.length === 0 ? (
-                <p className="text-white/20 text-sm italic">{language === 'Español' ? 'Tu despensa está vacía...' : 'Your pantry is empty...'}</p>
+                <p className="text-white/20 text-sm italic">{ui.pantry.empty}</p>
               ) : (
                 currentPantry.map(item => (
                   <div key={item} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/10 text-white text-xs font-bold uppercase tracking-wider">
@@ -109,22 +107,22 @@ export default function PantryView({ pantry, setPantry, language, ui }) {
         <div className="space-y-6">
           <div className="p-8 rounded-[32px] bg-gradient-to-br from-yellow-500 to-orange-600 text-black shadow-xl">
             <h3 className="text-lg font-black uppercase tracking-tight mb-2">
-              {language === 'Español' ? 'Añadir Extra' : 'Add Custom'}
+              {ui.pantry.addCustom}
             </h3>
             <p className="text-black/60 text-xs font-bold uppercase tracking-widest mb-6">
-              {language === 'Español' ? 'Ingredientes únicos' : 'Unique ingredients'}
+              {ui.pantry.unique}
             </p>
             <form onSubmit={addCustom} className="space-y-4">
               <input 
                 type="text" 
                 value={customItem}
                 onChange={(e) => setCustomItem(e.target.value)}
-                placeholder={language === 'Español' ? 'Ej: Curry, Miel...' : 'e.g. Curry, Honey...'}
+                placeholder={ui.pantry.customHint}
                 className="w-full h-14 px-4 rounded-xl bg-black/10 border border-black/10 placeholder:text-black/30 text-sm font-bold focus:outline-none focus:bg-black/20"
               />
               <button className="w-full h-14 rounded-xl bg-black text-white font-black uppercase tracking-[0.2em] text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
                 <Plus size={16} />
-                {language === 'Español' ? 'Añadir' : 'Add to Pantry'}
+                {ui.pantry.addToPantry}
               </button>
             </form>
           </div>

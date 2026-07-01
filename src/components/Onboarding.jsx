@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronRight, ChevronLeft, Globe, Key, Search, Sparkles, Flame } from 'lucide-react';
 
-export default function Onboarding({ onComplete, language, setLanguage, showToast }) {
+export default function Onboarding({ onComplete, language, setLanguage, ui, showToast }) {
   const [step, setStep] = useState(0);
   const [sourceId, setSourceId] = useState("");
   const [apiKey, setLocalApiKey] = useState("");
@@ -10,6 +10,7 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
   const [availableModels, setAvailableModels] = useState([]);
   const [loadingModels, setLoadingModels] = useState(false);
   const [localAllergies, setLocalAllergies] = useState("");
+  const onboarding = ui?.onboarding || {};
 
   React.useEffect(() => {
     let isMounted = true;
@@ -55,21 +56,21 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
     return () => { isMounted = false; };
   }, [provider, apiKey]);
 
-  const sources = [
-    { id: 'social', label: language === 'Español' ? 'Redes Sociales' : 'Social Media', icon: '📱' },
-    { id: 'friend', label: language === 'Español' ? 'Por un Amigo' : 'From a Friend', icon: '🤝' },
-    { id: 'search', label: language === 'Español' ? 'Buscador' : 'Search Engine', icon: '🔍' },
-    { id: 'ads', label: language === 'Español' ? 'Publicidad' : 'Advertisement', icon: '📺' },
-    { id: 'other', label: language === 'Español' ? 'Otro' : 'Other', icon: '✨' }
+  const sources = onboarding.sources || [
+    { id: 'social', label: 'Social Media', icon: '📱' },
+    { id: 'friend', label: 'From a Friend', icon: '🤝' },
+    { id: 'search', label: 'Search Engine', icon: '🔍' },
+    { id: 'ads', label: 'Advertisement', icon: '📺' },
+    { id: 'other', label: 'Other', icon: '✨' }
   ];
 
   const handleNext = () => {
     if (step === 1 && !sourceId) {
-      showToast(language === 'Español' ? "Por favor selecciona cómo nos conociste" : "Please select how you heard about us", 'error');
+      showToast(onboarding.selectSourceError || "Please select how you heard about us", 'error');
       return;
     }
     if (step === 3 && !apiKey) {
-      showToast(language === 'Español' ? "Por favor ingresa tu clave API" : "Please enter your API Key", 'error');
+      showToast(onboarding.enterApiKeyError || "Please enter your API Key", 'error');
       return;
     }
 
@@ -95,23 +96,29 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
 
   const steps = [
     {
-      title: language === 'Español' ? "Elige tu idioma" : "Preferred Language",
-      subtitle: language === 'Español' ? "Configura tu experiencia culinaria" : "Set up your culinary experience in your tongue.",
+      title: onboarding.languageTitle || "Preferred Language",
+      subtitle: onboarding.languageSubtitle || "Set up your culinary experience in your tongue.",
       content: (
         <div className="space-y-6">
-          <div className="flex gap-4">
-            {['English', 'Español'].map((l) => (
+          <div className="flex gap-4 flex-wrap">
+            {(onboarding.languageOptions || [
+              { label: 'English (US)', value: 'English' },
+              { label: 'Español', value: 'Español' },
+              { label: 'Français', value: 'Français' },
+              { label: 'العربية', value: 'العربية' },
+              { label: '中文', value: '中文' }
+            ]).map((option) => (
               <button
-                key={l}
-                onClick={() => setLanguage(l)}
-                className={`flex-1 flex flex-col items-center gap-2 md:gap-4 p-4 md:p-8 rounded-3xl border transition-all duration-500 ${
-                  language === l 
+                key={option.value}
+                onClick={() => setLanguage(option.value)}
+                className={`flex-1 min-w-[120px] flex flex-col items-center gap-2 md:gap-4 p-4 md:p-8 rounded-3xl border transition-all duration-500 ${
+                  language === option.value 
                     ? 'bg-yellow-500 border-yellow-400 text-black shadow-[0_0_30px_rgba(255,215,0,0.2)] scale-105' 
                     : 'bg-[#121212] border-white/10 text-white/40 hover:bg-[#1A1A1A]'
                 }`}
               >
                 <Globe size={24} className="md:w-8 md:h-8" />
-                <span className="font-black uppercase tracking-widest text-[9px] md:text-xs">{l === 'English' ? 'English (US)' : 'Español'}</span>
+                <span className="font-black uppercase tracking-widest text-[9px] md:text-xs">{option.label}</span>
               </button>
             ))}
           </div>
@@ -119,8 +126,8 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
       )
     },
     {
-      title: language === 'Español' ? "¿Cómo nos conociste?" : "How did you know about DishDash?",
-      subtitle: language === 'Español' ? "Cuéntanos un poco sobre tu llegada" : "Tell us a bit about how you found your way here.",
+      title: onboarding.sourceTitle || "How did you know about DishDash?",
+      subtitle: onboarding.sourceSubtitle || "Tell us a bit about how you found your way here.",
       content: (
         <div className="grid grid-cols-1 gap-3">
           {sources.map((s) => (
@@ -141,18 +148,18 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
       )
     },
     {
-      title: language === 'Español' ? "Personaliza tu Cocina" : "Personalize Your Kitchen",
-      subtitle: language === 'Español' ? "¿Tienes alguna restricción alimentaria?" : "Any dietary restrictions we should know about.",
+      title: onboarding.personalizeTitle || "Personalize Your Kitchen",
+      subtitle: onboarding.personalizeSubtitle || "Any dietary restrictions we should know about.",
       content: (
         <div className="space-y-6">
           <div>
             <label className="block text-[10px] text-white/40 font-black uppercase tracking-widest mb-2 px-1">
-              {language === 'Español' ? 'Alergias / Restricciones' : 'Allergies / Restrictions'}
+              {onboarding.allergiesLabel || 'Allergies / Restrictions'}
             </label>
             <textarea
               value={localAllergies}
               onChange={(e) => setLocalAllergies(e.target.value)}
-              placeholder={language === 'Español' ? 'Maníes, Gluten...' : 'Peanuts, Gluten...'}
+              placeholder={onboarding.allergiesPlaceholder || 'Peanuts, Gluten...'}
               className="w-full h-32 p-4 rounded-2xl bg-[#121212] border border-white/10 text-white focus:outline-none focus:border-yellow-500 transition-all text-sm resize-none"
             />
           </div>
@@ -160,8 +167,8 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
       )
     },
     {
-      title: language === 'Español' ? "Configura tu IA" : "Your API Key",
-      subtitle: language === 'Español' ? "Conecta el cerebro de tu cocina" : "Connect the brain of your kitchen to start cooking.",
+      title: onboarding.aiTitle || "Your API Key",
+      subtitle: onboarding.aiSubtitle || "Connect the brain of your kitchen to start cooking.",
       content: (
         <div className="space-y-6">
           <div className="space-y-4">
@@ -269,7 +276,7 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
               className="h-16 px-8 rounded-2xl bg-[#121212] border border-white/10 text-white/60 hover:text-white hover:bg-[#1A1A1A] transition-all font-black uppercase tracking-widest text-xs flex items-center gap-3"
             >
               <ChevronLeft size={20} />
-              {language === 'Español' ? 'Atrás' : 'Back'}
+              {onboarding.back || 'Back'}
             </button>
           )}
           <button
@@ -277,8 +284,8 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
             className="flex-1 h-16 rounded-2xl bg-yellow-500 text-black font-black uppercase tracking-widest text-xs hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-[0_10px_30px_rgba(255,215,0,0.2)]"
           >
             {step === steps.length - 1 
-              ? (language === 'Español' ? 'Entrar a la Cocina' : 'Enter Kitchen') 
-              : (language === 'Español' ? 'Continuar' : 'Continue')}
+              ? (onboarding.enterKitchen || 'Enter Kitchen') 
+              : (onboarding.continue || 'Continue')}
             <ChevronRight size={20} />
           </button>
         </div>
@@ -288,7 +295,7 @@ export default function Onboarding({ onComplete, language, setLanguage, showToas
             onClick={handleSkip}
             className="w-full mt-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-white/60 transition-all py-2"
           >
-            {language === 'Español' ? 'Saltar Paso' : 'Skip Step'}
+            {onboarding.skipStep || 'Skip Step'}
           </button>
         )}
       </div>

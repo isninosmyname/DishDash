@@ -27,15 +27,50 @@ export default function CookingMode({ steps, onExit, language, ui }) {
     const recog = new SpeechRecognition();
     recog.continuous = true;
     recog.interimResults = false;
-    recog.lang = language === 'Español' ? 'es-ES' : 'en-US';
+    const localeMap = {
+      English: 'en-US',
+      Español: 'es-ES',
+      Français: 'fr-FR',
+      العربية: 'ar-SA',
+      中文: 'zh-CN'
+    };
+    const commandMap = {
+      English: {
+        next: ['next'],
+        back: ['back'],
+        exit: ['exit', 'stop']
+      },
+      Español: {
+        next: ['siguiente', 'adelante'],
+        back: ['anterior', 'atrás', 'atras'],
+        exit: ['salir', 'parar', 'detener']
+      },
+      Français: {
+        next: ['suivant', 'suivante', 'continuer'],
+        back: ['retour', 'précédent', 'precedent'],
+        exit: ['sortir', 'arrêter', 'arreter', 'stop']
+      },
+      العربية: {
+        next: ['التالي', 'التالى', 'استمرار'],
+        back: ['السابق', 'عودة', 'رجوع'],
+        exit: ['خروج', 'توقف', 'وقف']
+      },
+      中文: {
+        next: ['下一步', '下一个', '继续'],
+        back: ['返回', '上一步', '后退'],
+        exit: ['退出', '停止']
+      }
+    };
+    recog.lang = localeMap[language] || 'en-US';
 
     recog.onresult = (event) => {
       const command = event.results[event.results.length - 1][0].transcript.toLowerCase();
-      if (command.includes('next') || command.includes('siguiente')) {
+      const commands = commandMap[language] || commandMap.English;
+      if (commands.next.some(trigger => command.includes(trigger))) {
         nextStep();
-      } else if (command.includes('back') || command.includes('anterior') || command.includes('atrás') || command.includes('atras')) {
+      } else if (commands.back.some(trigger => command.includes(trigger))) {
         prevStep();
-      } else if (command.includes('exit') || command.includes('salir') || command.includes('stop') || command.includes('parar')) {
+      } else if (commands.exit.some(trigger => command.includes(trigger))) {
         onExit();
       }
     };
@@ -148,7 +183,7 @@ export default function CookingMode({ steps, onExit, language, ui }) {
         </div>
         {!speechRecognitionSupported && (
           <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-[10px] text-red-400 uppercase tracking-[0.2em] text-center px-4">
-            {language === 'Español' ? 'Comandos de voz no compatibles en este navegador.' : 'Voice commands are not supported in this browser.'}
+            {ui.cooking.unsupported}
           </div>
         )}
 
