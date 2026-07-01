@@ -1,5 +1,5 @@
 import { UtensilsCrossed, Loader2 } from 'lucide-react';
-import apkUrl from '../assets/DishDash-1.2.apk';
+import apkUrl from '../assets/dishdash-1.3.apk';
 
 export default function Hero({ ingredients, setIngredients, onRoll, loading, ui }) {
   return (
